@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { ShoppingBag } from "lucide-react";
 import type { Product } from "@/data/products";
@@ -8,6 +10,15 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { name, price, originalPrice, tag, image, category } = product;
+
+  const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevents the click from bubbling up to the card if the card is a Link
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Add your cart logic here (e.g., dispatching to a store or calling an API)
+    console.log(`Added ${name} to cart`);
+  };
 
   return (
     <div className="group cursor-pointer">
@@ -24,7 +35,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Tag badge */}
         {tag && (
           <span
-            className={`absolute top-2 left-2 text-[10px] font-black tracking-widest px-2 py-1 ${
+            className={`absolute top-2 left-2 text-[10px] font-black tracking-widest px-2 py-1 z-10 ${
               tag === "SALE"
                 ? "bg-red-600 text-white"
                 : "bg-black text-white"
@@ -34,10 +45,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           </span>
         )}
 
-        {/* Quick add button — shows on hover (desktop) / always visible tap area (mobile) */}
+        {/* Quick add button */}
         <button
+          onClick={handleAddToCart}
           aria-label={`Add ${name} to cart`}
-          className="absolute bottom-0 left-0 right-0 bg-black text-white text-xs font-bold tracking-widest uppercase py-3 flex items-center justify-center gap-2 translate-y-full group-hover:translate-y-0 transition-transform duration-300"
+          /* FIXED: Added 'invisible group-hover:visible' for accessibility.
+             Without this, keyboard users would tab onto a hidden button.
+          */
+          className="absolute bottom-0 left-0 right-0 z-20 bg-black text-white text-xs font-bold tracking-widest uppercase py-4 flex items-center justify-center gap-2 translate-y-full group-hover:translate-y-0 invisible group-hover:visible transition-all duration-300 ease-in-out hover:bg-zinc-800"
         >
           <ShoppingBag size={14} />
           Quick Add
@@ -45,13 +60,22 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Info */}
-      <div>
-        <p className="text-[11px] text-zinc-400 uppercase tracking-widest mb-0.5">{category}</p>
-        <h3 className="text-sm font-semibold text-zinc-900 leading-snug mb-1">{name}</h3>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-zinc-900">${price}</span>
+      <div className="flex flex-col gap-0.5">
+        <p className="text-[11px] text-zinc-500 uppercase tracking-widest">
+          {category}
+        </p>
+        <h3 className="text-sm font-semibold text-zinc-900 leading-snug">
+          {name}
+        </h3>
+        <div className="flex items-center gap-2 mt-1">
+          {/* FIXED: Using toFixed(2) for consistent currency display */}
+          <span className="text-sm font-bold text-zinc-900">
+            ${price.toFixed(2)}
+          </span>
           {originalPrice && (
-            <span className="text-xs text-zinc-400 line-through">${originalPrice}</span>
+            <span className="text-xs text-zinc-400 line-through">
+              ${originalPrice.toFixed(2)}
+            </span>
           )}
         </div>
       </div>

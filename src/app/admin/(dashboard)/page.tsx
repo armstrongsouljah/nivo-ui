@@ -1,10 +1,6 @@
-import {
-  DollarSign,
-  ShoppingBag,
-  Users,
-  TrendingUp,
-} from "lucide-react";
+import { DollarSign, ShoppingBag, Users, TrendingUp } from "lucide-react";
 import { kpiStats } from "@/data/admin";
+import { serverApi } from "@/lib/server-api";
 import StatCard from "@/components/admin/StatCard";
 import SalesChart from "@/components/admin/SalesChart";
 import OrderStatusChart from "@/components/admin/OrderStatusChart";
@@ -18,8 +14,13 @@ const statIcons = [
   <TrendingUp key="avg" size={18} />,
 ];
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
   const stats = Object.values(kpiStats);
+
+  const recentProducts = await serverApi.products
+    .list({ page_size: 5 })
+    .then((r) => r.results)
+    .catch(() => []);
 
   return (
     <main className="flex-1 px-4 sm:px-6 py-6 overflow-y-auto">
@@ -29,7 +30,7 @@ export default function AdminDashboard() {
         <p className="text-xs text-zinc-500 mt-1">Apr 15, 2026 — All figures in UGX</p>
       </div>
 
-      {/* KPI cards — 2 col mobile, 4 col desktop */}
+      {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {stats.map((stat, i) => (
           <StatCard
@@ -43,7 +44,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Charts row — stacked mobile, side-by-side desktop */}
+      {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <div className="lg:col-span-2">
           <SalesChart />
@@ -53,13 +54,13 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Tables row — stacked mobile, side-by-side desktop */}
+      {/* Tables row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="xl:col-span-2">
           <RecentOrders />
         </div>
         <div className="xl:col-span-1">
-          <TopProducts />
+          <TopProducts products={recentProducts} />
         </div>
       </div>
     </main>

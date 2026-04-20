@@ -14,7 +14,9 @@ import {
   Menu,
   X,
   Tag,
+  Store,
 } from "lucide-react";
+import { logoutAction } from "@/app/admin/login/actions";
 
 const navItems = [
   { label: "Dashboard",  href: "/admin",          icon: LayoutDashboard },
@@ -93,14 +95,23 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="px-3 pb-5 border-t border-zinc-800 pt-4 shrink-0">
+        <div className="px-3 pb-5 border-t border-zinc-800 pt-4 shrink-0 space-y-0.5">
           <Link
             href="/"
             className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
           >
-            <LogOut size={16} />
+            <Store size={16} />
             Back to Store
           </Link>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            >
+              <LogOut size={16} />
+              Sign Out
+            </button>
+          </form>
         </div>
       </aside>
     </>
