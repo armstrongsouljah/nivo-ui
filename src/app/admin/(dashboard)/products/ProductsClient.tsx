@@ -9,8 +9,11 @@ import {
   PowerOff,
   ChevronDown,
   ImageOff,
+  Loader2,
 } from "lucide-react";
 import type { Product, Category } from "@/lib/api";
+import { toggleProductStatusAction } from "./actions";
+import { useConfirm } from "@/components/admin/ConfirmDialog";
 
 function priceLabel(inStock: boolean) {
   return inStock ? (
@@ -30,11 +33,39 @@ interface Props {
 }
 
 export default function ProductsClient({ initialProducts, initialCategories }: Props) {
+  const [products, setProducts]     = useState<Product[]>(initialProducts);
   const [search, setSearch]         = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter]     = useState("All");
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const confirm = useConfirm();
 
-  const filtered = initialProducts.filter((p) => {
+  async function handleToggleStatus(product: Product) {
+    const nextState = !product.is_active;
+    const confirmed = await confirm({
+      title: nextState ? `Activate "${product.name}"?` : `Deactivate "${product.name}"?`,
+      message: nextState
+        ? "This will make the product visible in the store."
+        : "This will hide the product from the store. Customers will no longer be able to find or purchase it.",
+      confirmLabel: nextState ? "Activate" : "Deactivate",
+      variant: nextState ? "info" : "danger",
+    });
+    if (!confirmed) return;
+
+    setTogglingId(product.id);
+    try {
+      await toggleProductStatusAction(product.id, nextState);
+      setProducts((prev) =>
+        prev.map((p) => p.id === product.id ? { ...p, is_active: nextState } : p)
+      );
+    } catch {
+      alert(`Failed to ${nextState ? "activate" : "deactivate"} "${product.name}". Please try again.`);
+    } finally {
+      setTogglingId(null);
+    }
+  }
+
+  const filtered = products.filter((p) => {
     const matchSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.slug.toLowerCase().includes(search.toLowerCase());
@@ -47,9 +78,9 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
     return matchSearch && matchCategory && matchStatus;
   });
 
-  const totalActive      = initialProducts.filter((p) =>  p.is_active).length;
-  const totalInactive    = initialProducts.filter((p) => !p.is_active).length;
-  const totalOutOfStock  = initialProducts.filter((p) => !p.in_stock).length;
+  const totalActive      = products.filter((p) =>  p.is_active).length;
+  const totalInactive    = products.filter((p) => !p.is_active).length;
+  const totalOutOfStock  = products.filter((p) => !p.in_stock).length;
 
   return (
     <main className="flex-1 px-4 sm:px-6 py-6 overflow-y-auto">
@@ -58,7 +89,7 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
         <div>
           <h1 className="text-xl font-black text-white uppercase tracking-tight">Products</h1>
           <p className="text-xs text-zinc-500 mt-1">
-            {initialProducts.length} total &mdash; manage catalogue, variants &amp; stock
+            {products.length} total &mdash; manage catalogue, variants &amp; stock
           </p>
         </div>
         <Link
@@ -73,7 +104,7 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
       {/* KPI strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Total",        value: initialProducts.length, color: "text-white"      },
+          { label: "Total",        value: products.length,        color: "text-white"      },
           { label: "Active",       value: totalActive,            color: "text-green-400"  },
           { label: "Inactive",     value: totalInactive,          color: "text-zinc-500"   },
           { label: "Out of Stock", value: totalOutOfStock,        color: "text-amber-400"  },
@@ -203,14 +234,18 @@ export default function ProductsClient({ initialProducts, initialCategories }: P
                           <Pencil size={13} />
                         </Link>
                         <button
+                          onClick={() => handleToggleStatus(product)}
+                          disabled={togglingId === product.id}
                           title={product.is_active ? "Deactivate" : "Activate"}
-                          className={`p-1.5 rounded-md transition-colors ${
+                          className={`p-1.5 rounded-md transition-colors disabled:opacity-40 ${
                             product.is_active
                               ? "text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
                               : "text-zinc-500 hover:text-green-400 hover:bg-green-500/10"
                           }`}
                         >
-                          <PowerOff size={13} />
+                          {togglingId === product.id
+                            ? <Loader2 size={13} className="animate-spin" />
+                            : <PowerOff size={13} />}
                         </button>
                       </div>
                     </td>

@@ -32,6 +32,10 @@ export async function updateProductAction(id: string, payload: ProductUpdatePayl
   return serverApi.products.update(id, payload);
 }
 
+export async function toggleProductStatusAction(id: string, is_active: boolean): Promise<void> {
+  await serverApi.products.update(id, { is_active });
+}
+
 export async function addVariantAction(productId: string, payload: VariantCreatePayload): Promise<void> {
   return serverApi.products.createVariant(productId, payload);
 }

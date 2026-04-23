@@ -42,6 +42,7 @@ export default function AdminLoginPage() {
                 type="email"
                 autoComplete="email"
                 required
+                defaultValue={state?.email ?? ""}
                 placeholder="you@example.com"
                 className="w-full bg-zinc-950 border border-zinc-800 text-white text-sm px-3.5 py-2.5 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
               />

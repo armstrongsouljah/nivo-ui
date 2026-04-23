@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { logoutAction } from "@/app/admin/login/actions";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -18,7 +19,6 @@ import {
   Palette,
   Layers,
 } from "lucide-react";
-import { logoutAction } from "@/app/admin/login/actions";
 
 const navItems = [
   { label: "Dashboard",    href: "/admin",               icon: LayoutDashboard },
@@ -34,7 +34,15 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    setLoggingOut(true);
+    await logoutAction();
+    router.push("/admin/login");
+  }
 
   return (
     <>
@@ -107,15 +115,15 @@ export default function Sidebar() {
             <Store size={16} />
             Back to Store
           </Link>
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-            >
-              <LogOut size={16} />
-              Sign Out
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+          >
+            <LogOut size={16} />
+            {loggingOut ? "Signing out…" : "Sign Out"}
+          </button>
         </div>
       </aside>
     </>

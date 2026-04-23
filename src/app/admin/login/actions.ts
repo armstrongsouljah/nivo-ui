@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { redirect } from "next/navigation"; // used by loginAction
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!.replace(/\/$/, "");
 const IS_PROD = process.env.NODE_ENV === "production";
@@ -19,14 +19,14 @@ interface LoginResponse {
 }
 
 export async function loginAction(
-  _prevState: { error?: string } | undefined,
+  _prevState: { error?: string; email?: string } | undefined,
   formData: FormData
-): Promise<{ error: string }> {
+): Promise<{ error: string; email: string }> {
   const email    = (formData.get("email")    as string | null)?.trim() ?? "";
   const password = (formData.get("password") as string | null)          ?? "";
 
   if (!email || !password) {
-    return { error: "Email and password are required." };
+    return { error: "Email and password are required.", email };
   }
 
   let data: LoginResponse;
@@ -39,16 +39,16 @@ export async function loginAction(
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({})) as { detail?: string };
-      return { error: body.detail ?? "Invalid email or password." };
+      return { error: body.detail ?? "Invalid email or password.", email };
     }
 
     data = (await res.json()) as LoginResponse;
   } catch {
-    return { error: "Could not reach the server. Please try again." };
+    return { error: "Could not reach the server. Please try again.", email };
   }
 
   if (data.user.role !== "admin") {
-    return { error: "Access denied. This dashboard is for admin accounts only." };
+    return { error: "Access denied. This dashboard is for admin accounts only.", email };
   }
 
   const cookieStore = await cookies();
@@ -87,6 +87,4 @@ export async function logoutAction() {
   cookieStore.delete("access_token");
   cookieStore.delete("refresh_token");
   cookieStore.delete("user_role");
-
-  redirect("/admin/login");
 }
