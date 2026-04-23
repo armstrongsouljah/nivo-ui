@@ -15,17 +15,21 @@ import {
   X,
   Tag,
   Store,
+  Palette,
+  Layers,
 } from "lucide-react";
 import { logoutAction } from "@/app/admin/login/actions";
 
 const navItems = [
-  { label: "Dashboard",  href: "/admin",          icon: LayoutDashboard },
-  { label: "Orders",     href: "/admin/orders",   icon: ShoppingBag },
-  { label: "Products",   href: "/admin/products", icon: Package },
-  { label: "Customers",  href: "/admin/customers",icon: Users },
-  { label: "Promotions", href: "/admin/promos",   icon: Tag },
-  { label: "Analytics",  href: "/admin/analytics",icon: BarChart2 },
-  { label: "Settings",   href: "/admin/settings", icon: Settings },
+  { label: "Dashboard",    href: "/admin",               icon: LayoutDashboard },
+  { label: "Orders",       href: "/admin/orders",        icon: ShoppingBag },
+  { label: "Products",     href: "/admin/products",      icon: Package },
+  { label: "Collections",  href: "/admin/collections",   icon: Layers },
+  { label: "Attributes",   href: "/admin/attributes",    icon: Palette },
+  { label: "Customers",    href: "/admin/customers",     icon: Users },
+  { label: "Promotions",   href: "/admin/promos",        icon: Tag },
+  { label: "Analytics",    href: "/admin/analytics",     icon: BarChart2 },
+  { label: "Settings",     href: "/admin/settings",      icon: Settings },
 ];
 
 export default function Sidebar() {

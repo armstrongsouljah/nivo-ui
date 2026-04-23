@@ -4,7 +4,7 @@ import { useState, useId, useRef } from "react";
 import Link from "next/link";
 import {
   ArrowLeft, Check, Plus, Trash2, Pencil, ChevronDown,
-  ImageOff, UploadCloud, X, Loader2, Save,
+  UploadCloud, X, Loader2, Save,
 } from "lucide-react";
 import {
   updateProductAction,
@@ -16,7 +16,7 @@ import {
   createCategoryAction,
   getUploadSignature,
 } from "../../actions";
-import type { ProductDetail, ProductVariantDetail, GalleryImage, Category } from "@/lib/api";
+import type { ProductDetail, ProductVariantDetail, GalleryImage, Category, AttributeDetail } from "@/lib/api";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -187,16 +187,71 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
   );
 }
 
+// ─── Attribute picker ─────────────────────────────────────────────────────────
+
+function AttributePicker({
+  attributes,
+  selected,
+  onChange,
+}: {
+  attributes: AttributeDetail[];
+  selected: Record<string, string>; // attributeId → valueId
+  onChange: (attributeId: string, valueId: string | null) => void;
+}) {
+  if (!attributes.length) return null;
+  return (
+    <div className="space-y-3">
+      {attributes.map((attr) => (
+        <div key={attr.id}>
+          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+            {attr.name}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {(attr.values ?? []).map((val) => {
+              const isSelected = selected[attr.id] === val.id;
+              const hex = val.metadata?.color as string | undefined;
+              return (
+                <button
+                  key={val.id}
+                  type="button"
+                  title={val.display_value || val.value}
+                  onClick={() => onChange(attr.id, isSelected ? null : val.id)}
+                  className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-bold transition-all ${
+                    isSelected
+                      ? "border-white text-white bg-zinc-700"
+                      : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+                  }`}
+                >
+                  {hex && (
+                    <span
+                      className="w-3 h-3 rounded-full border border-zinc-600 shrink-0"
+                      style={{ backgroundColor: hex }}
+                    />
+                  )}
+                  {val.display_value || val.value}
+                  {isSelected && <Check size={10} className="shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Variant row (existing) ───────────────────────────────────────────────────
 
 function ExistingVariantRow({
   variant,
   productId,
+  attributes,
   onUpdated,
   onDeleted,
 }: {
   variant: ProductVariantDetail;
   productId: string;
+  attributes: AttributeDetail[];
   onUpdated: (v: ProductVariantDetail) => void;
   onDeleted: (id: string) => void;
 }) {
@@ -210,6 +265,9 @@ function ExistingVariantRow({
   const [stock, setStock]               = useState(String(variant.stock_quantity));
   const [ageGroup, setAgeGroup]         = useState(variant.age_group);
   const [isActive, setIsActive]         = useState(variant.is_active);
+  const [attrSelected, setAttrSelected] = useState<Record<string, string>>(
+    () => Object.fromEntries(variant.attributes.map((a) => [a.attribute_id, a.value_id]))
+  );
 
   const priceId    = useId();
   const compareId  = useId();
@@ -223,6 +281,7 @@ function ExistingVariantRow({
     if (!price) { setError("Price is required."); return; }
     setSaving(true);
     setError(null);
+    const attribute_value_ids = Object.values(attrSelected).filter(Boolean);
     try {
       await updateVariantAction(productId, variant.id, {
         price,
@@ -230,8 +289,10 @@ function ExistingVariantRow({
         stock_quantity: parseInt(stock) || 0,
         age_group: ageGroup,
         is_active: isActive,
+        attribute_value_ids,
       });
-      onUpdated({ ...variant, price, compare_at_price: compareAt || null, stock_quantity: parseInt(stock) || 0, age_group: ageGroup, is_active: isActive });
+      const updatedAttrs = variant.attributes.filter((a) => attrSelected[a.attribute_id] === a.value_id);
+      onUpdated({ ...variant, price, compare_at_price: compareAt || null, stock_quantity: parseInt(stock) || 0, age_group: ageGroup, is_active: isActive, attributes: updatedAttrs });
       setEditing(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save.");
@@ -334,6 +395,21 @@ function ExistingVariantRow({
             </div>
           </div>
 
+          {attributes.length > 0 && (
+            <AttributePicker
+              attributes={attributes}
+              selected={attrSelected}
+              onChange={(attrId, valueId) =>
+                setAttrSelected((prev) => {
+                  const next = { ...prev };
+                  if (valueId === null) delete next[attrId];
+                  else next[attrId] = valueId;
+                  return next;
+                })
+              }
+            />
+          )}
+
           <label className="flex items-center gap-2.5 cursor-pointer w-fit">
             <button
               type="button"
@@ -370,10 +446,12 @@ function ExistingVariantRow({
 
 function NewVariantForm({
   productId,
+  attributes,
   onAdded,
   onCancel,
 }: {
   productId: string;
+  attributes: AttributeDetail[];
   onAdded: (v: ProductVariantDetail) => void;
   onCancel: () => void;
 }) {
@@ -381,6 +459,7 @@ function NewVariantForm({
   const [compareAt, setCompareAt] = useState("");
   const [stock, setStock]         = useState("");
   const [ageGroup, setAgeGroup]   = useState("");
+  const [attrSelected, setAttrSelected] = useState<Record<string, string>>({});
   const [saving, setSaving]       = useState(false);
   const [error, setError]         = useState<string | null>(null);
 
@@ -394,13 +473,14 @@ function NewVariantForm({
     if (!ageGroup) { setError("Age group is required."); return; }
     setSaving(true);
     setError(null);
+    const attribute_value_ids = Object.values(attrSelected).filter(Boolean);
     try {
       await addVariantAction(productId, {
         price,
         compare_at_price: compareAt,
         stock_quantity: parseInt(stock) || 0,
         age_group: ageGroup,
-        attribute_value_ids: [],
+        attribute_value_ids,
         sku: "",
         is_active: true,
       });
@@ -412,7 +492,12 @@ function NewVariantForm({
         stock_quantity: parseInt(stock) || 0,
         age_group: ageGroup,
         is_active: true,
-        attributes: [],
+        attributes: attributes.flatMap((attr) => {
+          const valueId = attrSelected[attr.id];
+          const val = attr.values.find((v) => v.id === valueId);
+          if (!val) return [];
+          return [{ attribute_id: attr.id, attribute: attr.name, value_id: val.id, value: val.display_value || val.value, metadata: val.metadata }];
+        }),
       };
       onAdded(optimistic);
     } catch (e) {
@@ -460,6 +545,21 @@ function NewVariantForm({
           </div>
         </div>
       </div>
+
+      {attributes.length > 0 && (
+        <AttributePicker
+          attributes={attributes}
+          selected={attrSelected}
+          onChange={(attrId, valueId) =>
+            setAttrSelected((prev) => {
+              const next = { ...prev };
+              if (valueId === null) delete next[attrId];
+              else next[attrId] = valueId;
+              return next;
+            })
+          }
+        />
+      )}
 
       <InlineError msg={error} />
 
@@ -611,9 +711,11 @@ function toSlug(name: string): string {
 export default function EditProductClient({
   product,
   initialCategories,
+  attributes,
 }: {
   product: ProductDetail;
   initialCategories: Category[];
+  attributes: AttributeDetail[];
 }) {
   // ── Details state ────────────────────────────────────────────────────────
   const [name, setName]               = useState(product.name);
@@ -811,6 +913,7 @@ export default function EditProductClient({
                 key={v.id}
                 variant={v}
                 productId={product.id}
+                attributes={attributes}
                 onUpdated={(updated) => setVariants((prev) => prev.map((x) => x.id === updated.id ? updated : x))}
                 onDeleted={(id) => setVariants((prev) => prev.filter((x) => x.id !== id))}
               />
@@ -818,6 +921,7 @@ export default function EditProductClient({
             {addingVariant && (
               <NewVariantForm
                 productId={product.id}
+                attributes={attributes}
                 onAdded={(v) => { setVariants((prev) => [...prev, v]); setAddingVariant(false); }}
                 onCancel={() => setAddingVariant(false)}
               />

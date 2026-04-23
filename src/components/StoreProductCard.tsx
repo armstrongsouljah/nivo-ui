@@ -37,7 +37,7 @@ export default function StoreProductCard({ product }: Props) {
         )}
 
         <button
-          aria-label={`Add ${product.name} to cart`}
+          aria-label={`Quick view ${product.name}`}
           className="absolute bottom-0 left-0 right-0 z-20 bg-black text-white text-xs font-bold tracking-widest uppercase py-4 flex items-center justify-center gap-2 translate-y-full group-hover:translate-y-0 invisible group-hover:visible transition-all duration-300 ease-in-out hover:bg-zinc-800"
           onClick={(e) => {
             e.preventDefault();

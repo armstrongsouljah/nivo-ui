@@ -9,9 +9,10 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
 
-  const [product, categoriesRes] = await Promise.all([
+  const [product, categoriesRes, attributesRes] = await Promise.all([
     serverApi.products.get(id).catch(() => null),
     serverApi.categories.list().catch(() => ({ results: [] })),
+    serverApi.attributes.list().catch(() => ({ results: [] })),
   ]);
 
   if (!product) notFound();
@@ -20,6 +21,7 @@ export default async function EditProductPage({
     <EditProductClient
       product={product}
       initialCategories={categoriesRes.results}
+      attributes={attributesRes.results}
     />
   );
 }

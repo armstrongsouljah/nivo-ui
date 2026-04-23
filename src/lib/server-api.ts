@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage } from "./api";
+import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload } from "./api";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL!.replace(/\/$/, "");
 
@@ -30,6 +30,24 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const serverApi = {
+  attributes: {
+    list: () =>
+      request<PaginatedResponse<AttributeDetail>>("/products/attributes/?page_size=100"),
+    create: (name: string) =>
+      request<AttributeDetail>("/products/attributes/", {
+        method: "POST",
+        body: JSON.stringify({ name }),
+      }),
+    delete: (id: string) =>
+      request<void>(`/products/attributes/${id}/`, { method: "DELETE" }),
+    createValue: (attributeId: string, payload: { value: string; display_value: string; metadata?: Record<string, string> }) =>
+      request<AttributeValueItem>(`/products/attributes/${attributeId}/values/`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    deleteValue: (attributeId: string, valueId: string) =>
+      request<void>(`/products/attributes/${attributeId}/values/${valueId}/`, { method: "DELETE" }),
+  },
   categories: {
     list: () =>
       request<PaginatedResponse<Category>>("/products/categories/?page_size=100"),
@@ -47,12 +65,14 @@ export const serverApi = {
       request<void>(`/products/categories/${id}/`, { method: "DELETE" }),
   },
   products: {
-    list: (params?: { page_size?: number; search?: string; category?: string; new_arrivals?: boolean }) => {
+    list: (params?: { page_size?: number; page?: number; search?: string; category?: string; new_arrivals?: boolean; is_active?: boolean }) => {
       const qs = new URLSearchParams();
       qs.set("page_size", String(params?.page_size ?? 50));
-      if (params?.search)        qs.set("search",       params.search);
-      if (params?.category)      qs.set("category",     params.category);
-      if (params?.new_arrivals)  qs.set("new_arrivals", "true");
+      if (params?.page && params.page > 1) qs.set("page", String(params.page));
+      if (params?.search)                  qs.set("search",       params.search);
+      if (params?.category)                qs.set("category",     params.category);
+      if (params?.new_arrivals)            qs.set("new_arrivals", "true");
+      if (params?.is_active !== undefined) qs.set("is_active",    params.is_active ? "true" : "false");
       return request<PaginatedResponse<Product>>(`/products/?${qs}`);
     },
     create: (payload: ProductCreatePayload) =>
@@ -88,5 +108,23 @@ export const serverApi = {
       }),
     deleteGalleryImage: (productId: string, imageId: string) =>
       request<void>(`/products/${productId}/gallery/${imageId}/`, { method: "DELETE" }),
+  },
+  featuredCollections: {
+    list: () =>
+      request<PaginatedResponse<FeaturedCollectionSummary>>("/products/featured-collections/?page_size=50"),
+    get: (slug: string) =>
+      request<FeaturedCollectionDetail>(`/products/featured-collections/${slug}`),
+    create: (payload: FeaturedCollectionCreatePayload) =>
+      request<FeaturedCollectionDetail>("/products/featured-collections/", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    update: (slug: string, payload: FeaturedCollectionUpdatePayload) =>
+      request<FeaturedCollectionDetail>(`/products/featured-collections/${slug}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    delete: (slug: string) =>
+      request<void>(`/products/featured-collections/${slug}`, { method: "DELETE" }),
   },
 };

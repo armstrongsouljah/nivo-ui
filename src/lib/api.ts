@@ -56,6 +56,44 @@ export interface VariantAttribute {
   metadata: Record<string, string>;
 }
 
+export interface VariantAttributeOption {
+  name: string;
+  slug: string;
+  value: string;
+  display: string;
+  metadata: Record<string, string>;
+}
+
+export interface VariantOption {
+  variant_id: string;
+  sku: string;
+  price: string;
+  compare_at_price: string | null;
+  in_stock: boolean;
+  stock_quantity: number;
+  attributes: VariantAttributeOption[];
+}
+
+export interface AgeGroupOptions {
+  age_group: string;
+  age_group_display: string;
+  options: VariantOption[];
+}
+
+export interface AttributeValueItem {
+  id: string;
+  value: string;
+  display_value: string;
+  metadata: Record<string, string>;
+}
+
+export interface AttributeDetail {
+  id: string;
+  name: string;
+  slug: string;
+  values: AttributeValueItem[];
+}
+
 export interface ProductVariantDetail {
   id: string;
   sku: string;
@@ -67,6 +105,42 @@ export interface ProductVariantDetail {
   attributes: VariantAttribute[];
 }
 
+export interface FeaturedCollectionSummary {
+  name: string;
+  slug: string;
+  product_count: number;
+  cover_image_url: string;
+  is_active: boolean;
+}
+
+export interface FeaturedCollectionDetail {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  cover_image_url: string;
+  is_active: boolean;
+  products: Product[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeaturedCollectionCreatePayload {
+  name: string;
+  description?: string;
+  cover_image_url?: string;
+  is_active?: boolean;
+  products?: string[];
+}
+
+export interface FeaturedCollectionUpdatePayload {
+  name?: string;
+  description?: string;
+  cover_image_url?: string;
+  is_active?: boolean;
+  products?: string[];
+}
+
 export interface GalleryImage {
   id: string;
   url: string;
@@ -76,7 +150,8 @@ export interface GalleryImage {
 
 export interface ProductDetail extends Product {
   description: string;
-  variants: ProductVariantDetail[];
+  variant_options: AgeGroupOptions[];
+  variants?: ProductVariantDetail[];
   gallery: GalleryImage[];
 }
 
@@ -95,6 +170,7 @@ export interface VariantUpdatePayload {
   stock_quantity?: number;
   age_group?: string;
   is_active?: boolean;
+  attribute_value_ids?: string[];
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -112,6 +188,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  attributes: {
+    list: () =>
+      request<PaginatedResponse<AttributeDetail>>("/products/attributes/?page_size=100"),
+  },
+  featuredCollections: {
+    list: () =>
+      request<PaginatedResponse<FeaturedCollectionSummary>>("/products/featured-collections/?page_size=50"),
+    get: (slug: string) =>
+      request<FeaturedCollectionDetail>(`/products/featured-collections/${slug}`),
+  },
   categories: {
     list: () =>
       request<PaginatedResponse<Category>>("/products/categories/?page_size=100"),

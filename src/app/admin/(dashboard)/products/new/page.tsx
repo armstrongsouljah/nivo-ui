@@ -17,7 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { getUploadSignature, createCategoryAction, createProductAction } from "../actions";
-import { api, type Category } from "@/lib/api";
+import { api, type Category, type AttributeDetail } from "@/lib/api";
 
 // ─── useCategories hook ───────────────────────────────────────────────────────
 
@@ -36,7 +36,6 @@ function useCategories() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Mutations go through server actions so the Bearer token is attached server-side
   async function createCategory(name: string): Promise<Category> {
     const created = await createCategoryAction(name);
     setCategories((prev) => [...prev, created]);
@@ -46,46 +45,23 @@ function useCategories() {
   return { categories, loading, error, createCategory };
 }
 
-const ATTRIBUTES: {
-  id: string;
-  name: string;
-  values: { id: string; value: string; display_value: string; metadata?: Record<string, string> }[];
-}[] = [
-  {
-    id: "attr-size",
-    name: "Size",
-    values: [
-      { id: "sz-xs",  value: "xs",  display_value: "XS"  },
-      { id: "sz-s",   value: "s",   display_value: "S"   },
-      { id: "sz-m",   value: "m",   display_value: "M"   },
-      { id: "sz-l",   value: "l",   display_value: "L"   },
-      { id: "sz-xl",  value: "xl",  display_value: "XL"  },
-      { id: "sz-xxl", value: "xxl", display_value: "XXL" },
-    ],
-  },
-  {
-    id: "attr-color",
-    name: "Color",
-    values: [
-      { id: "cl-black", value: "black", display_value: "Black", metadata: { hex: "#000000" } },
-      { id: "cl-white", value: "white", display_value: "White", metadata: { hex: "#ffffff" } },
-      { id: "cl-navy",  value: "navy",  display_value: "Navy",  metadata: { hex: "#1e3a5f" } },
-      { id: "cl-grey",  value: "grey",  display_value: "Grey",  metadata: { hex: "#6b7280" } },
-      { id: "cl-olive", value: "olive", display_value: "Olive", metadata: { hex: "#6b7c45" } },
-      { id: "cl-red",   value: "red",   display_value: "Red",   metadata: { hex: "#ef4444" } },
-    ],
-  },
-  {
-    id: "attr-material",
-    name: "Material",
-    values: [
-      { id: "mt-cotton",    value: "cotton",    display_value: "Cotton"    },
-      { id: "mt-polyester", value: "polyester", display_value: "Polyester" },
-      { id: "mt-fleece",    value: "fleece",    display_value: "Fleece"    },
-      { id: "mt-denim",     value: "denim",     display_value: "Denim"     },
-    ],
-  },
-];
+// ─── useAttributes hook ───────────────────────────────────────────────────────
+
+function useAttributes() {
+  const [attributes, setAttributes] = useState<AttributeDetail[]>([]);
+  const [loading, setLoading]       = useState(true);
+
+  useEffect(() => {
+    api.attributes
+      .list()
+      .then((res) => setAttributes(res.results))
+      .catch(() => setAttributes([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { attributes, loading };
+}
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -147,15 +123,16 @@ function cartesian<T>(arrays: T[][]): T[][] {
   );
 }
 
-function variantLabel(valueIds: string[]): string {
+function variantLabel(valueIds: string[], attributes: AttributeDetail[]): string {
   return valueIds
     .map((vid) => {
-      for (const attr of ATTRIBUTES) {
-        const v = attr.values.find((av) => av.id === vid);
-        if (v) return v.display_value;
+      for (const attr of attributes) {
+        const v = (attr.values ?? []).find((av) => av.id === vid);
+        if (v) return v.display_value || v.value;
       }
-      return vid;
+      return "";
     })
+    .filter(Boolean)
     .join(" / ");
 }
 
@@ -599,11 +576,12 @@ function StepDetails({ data, onChange, categories, loadingCategories, createCate
 
 // ─── Step 2: Variants ─────────────────────────────────────────────────────────
 
-function VariantRowEditor({ row, onChange, onRemove, index }: {
+function VariantRowEditor({ row, onChange, onRemove, index, attributes }: {
   row: VariantRow;
   onChange: (r: VariantRow) => void;
   onRemove: () => void;
   index: number;
+  attributes: AttributeDetail[];
 }) {
   const ageId   = useId();
   const skuId   = useId();
@@ -615,7 +593,7 @@ function VariantRowEditor({ row, onChange, onRemove, index }: {
     onChange({ ...row, [k]: v });
   }
 
-  const label = variantLabel(row.attribute_value_ids);
+  const label = variantLabel(row.attribute_value_ids, attributes);
   const ageLabel = AGE_GROUPS.find((a) => a.value === row.age_group)?.label;
 
   return (
@@ -735,54 +713,54 @@ function VariantRowEditor({ row, onChange, onRemove, index }: {
   );
 }
 
-function StepVariants({ selectedAttrs, onSelectedAttrsChange, variants, onVariantsChange }: {
-  selectedAttrs: SelectedAttribute[];
-  onSelectedAttrsChange: (a: SelectedAttribute[]) => void;
+// ageColors: age_group value → selected color value IDs (key absent = disabled)
+type AgeColors = Record<string, string[]>;
+
+function StepVariants({ variants, onVariantsChange, attributes }: {
   variants: VariantRow[];
   onVariantsChange: (v: VariantRow[]) => void;
+  attributes: AttributeDetail[];
 }) {
-  function toggleAttribute(attrId: string) {
-    const exists = selectedAttrs.find((a) => a.attribute_id === attrId);
-    if (exists) {
-      onSelectedAttrsChange(selectedAttrs.filter((a) => a.attribute_id !== attrId));
-    } else {
-      onSelectedAttrsChange([...selectedAttrs, { attribute_id: attrId, value_ids: [] }]);
-    }
+  const colorAttr = attributes.find((a) => a.name.toLowerCase() === "color");
+  const colorValues = colorAttr?.values ?? [];
+
+  // Per-age-group color selections
+  const [ageColors, setAgeColors] = useState<AgeColors>({});
+
+  function toggleAge(ageValue: string) {
+    setAgeColors((prev) => {
+      const next = { ...prev };
+      if (ageValue in next) delete next[ageValue];
+      else next[ageValue] = [];
+      return next;
+    });
   }
 
-  function toggleValue(attrId: string, valueId: string) {
-    onSelectedAttrsChange(
-      selectedAttrs.map((a) => {
-        if (a.attribute_id !== attrId) return a;
-        const has = a.value_ids.includes(valueId);
-        return { ...a, value_ids: has ? a.value_ids.filter((v) => v !== valueId) : [...a.value_ids, valueId] };
-      })
-    );
+  function toggleColor(ageValue: string, colorId: string) {
+    setAgeColors((prev) => {
+      const current = prev[ageValue] ?? [];
+      const next = current.includes(colorId)
+        ? current.filter((id) => id !== colorId)
+        : [...current, colorId];
+      return { ...prev, [ageValue]: next };
+    });
   }
 
-  function generateCombinations() {
-    const activeSets = selectedAttrs
-      .filter((a) => a.value_ids.length > 0)
-      .map((a) => a.value_ids);
-
-    if (!activeSets.length) {
-      onVariantsChange([{ id: uid(), attribute_value_ids: [], age_group: "", sku: "", price: "", compare_at_price: "", stock: "", is_active: true }]);
-      return;
+  function buildVariants() {
+    const defaultPrice = variants[0]?.price ?? "";
+    const rows: VariantRow[] = [];
+    for (const ag of AGE_GROUPS) {
+      if (!(ag.value in ageColors)) continue;
+      const colors = ageColors[ag.value];
+      if (colors.length === 0) {
+        rows.push({ id: uid(), attribute_value_ids: [], age_group: ag.value, sku: "", price: defaultPrice, compare_at_price: "", stock: "", is_active: true });
+      } else {
+        for (const colorId of colors) {
+          rows.push({ id: uid(), attribute_value_ids: [colorId], age_group: ag.value, sku: "", price: defaultPrice, compare_at_price: "", stock: "", is_active: true });
+        }
+      }
     }
-
-    const combos = cartesian(activeSets);
-    onVariantsChange(
-      combos.map((combo) => ({
-        id: uid(),
-        attribute_value_ids: combo,
-        age_group: variants[0]?.age_group ?? "",
-        sku: "",
-        price: variants[0]?.price ?? "",
-        compare_at_price: variants[0]?.compare_at_price ?? "",
-        stock: "",
-        is_active: true,
-      }))
-    );
+    if (rows.length) onVariantsChange(rows);
   }
 
   function addBlankVariant() {
@@ -800,55 +778,84 @@ function StepVariants({ selectedAttrs, onSelectedAttrsChange, variants, onVarian
     onVariantsChange(variants.filter((v) => v.id !== id));
   }
 
-  const canGenerate = selectedAttrs.some((a) => a.value_ids.length > 0);
+  const enabledCount = Object.keys(ageColors).length;
+  const totalVariants = Object.entries(ageColors).reduce((sum, [, colors]) => sum + Math.max(colors.length, 1), 0);
 
   return (
     <div className="space-y-4">
-      <SectionCard title="Product Attributes">
-        <p className="text-xs text-zinc-500 mb-4">
-          Choose which attributes define this product&apos;s variants, then select the available values.
+      <SectionCard title="Age Groups & Colors">
+        <p className="text-xs text-zinc-500 mb-5">
+          Enable each age group you want to offer, then pick which colors are available for it.
+          Each age group + color becomes its own variant with independent stock.
         </p>
-        <div className="space-y-5">
-          {ATTRIBUTES.map((attr) => {
-            const selected = selectedAttrs.find((a) => a.attribute_id === attr.id);
-            const isOn = !!selected;
+
+        {colorValues.length === 0 && (
+          <p className="text-xs text-zinc-600 italic mb-4">
+            No Color attribute found.{" "}
+            <a href="/admin/attributes" className="underline hover:text-zinc-400">Add colors</a>{" "}
+            to enable color selection per age group.
+          </p>
+        )}
+
+        <div className="space-y-3">
+          {AGE_GROUPS.map((ag) => {
+            const enabled = ag.value in ageColors;
+            const selectedColors = ageColors[ag.value] ?? [];
             return (
-              <div key={attr.id}>
-                <label className="flex items-center gap-3 cursor-pointer mb-3 w-fit">
+              <div
+                key={ag.value}
+                className={`rounded-lg border transition-colors ${enabled ? "border-zinc-700 bg-zinc-950" : "border-zinc-800 bg-zinc-900/30"}`}
+              >
+                {/* Row header — toggle + label */}
+                <div className="flex items-center gap-3 px-4 py-3">
                   <button
                     type="button"
                     role="switch"
-                    aria-checked={isOn}
-                    onClick={() => toggleAttribute(attr.id)}
-                    className={`relative w-9 h-5 rounded-full transition-colors ${isOn ? "bg-white" : "bg-zinc-700"}`}
+                    aria-checked={enabled}
+                    onClick={() => toggleAge(ag.value)}
+                    className={`relative w-9 h-5 rounded-full shrink-0 transition-colors ${enabled ? "bg-white" : "bg-zinc-700"}`}
                   >
-                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform ${isOn ? "translate-x-4 bg-black" : "translate-x-0 bg-zinc-400"}`} />
+                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform ${enabled ? "translate-x-4 bg-black" : "translate-x-0 bg-zinc-400"}`} />
                   </button>
-                  <span className={`text-sm font-semibold ${isOn ? "text-white" : "text-zinc-500"}`}>{attr.name}</span>
-                </label>
+                  <span className={`text-sm font-semibold ${enabled ? "text-white" : "text-zinc-500"}`}>
+                    {ag.label}
+                  </span>
+                  {enabled && selectedColors.length > 0 && (
+                    <span className="ml-auto text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                      {selectedColors.length} color{selectedColors.length !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                  {enabled && selectedColors.length === 0 && colorValues.length > 0 && (
+                    <span className="ml-auto text-[10px] font-bold text-amber-500 uppercase tracking-widest">
+                      No color — 1 variant
+                    </span>
+                  )}
+                </div>
 
-                {isOn && (
-                  <div className="flex flex-wrap gap-2 ml-12">
-                    {attr.values.map((val) => {
-                      const checked = selected?.value_ids.includes(val.id) ?? false;
+                {/* Color swatches */}
+                {enabled && colorValues.length > 0 && (
+                  <div className="px-4 pb-3 flex flex-wrap gap-2 border-t border-zinc-800 pt-3">
+                    {colorValues.map((val) => {
+                      const checked = selectedColors.includes(val.id);
+                      const hex = val.metadata?.color as string | undefined;
                       return (
                         <button
                           key={val.id}
                           type="button"
-                          onClick={() => toggleValue(attr.id, val.id)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors ${
+                          onClick={() => toggleColor(ag.value, val.id)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                             checked
                               ? "bg-white text-black border-white"
-                              : "bg-zinc-900 text-zinc-400 border-zinc-700 hover:border-zinc-500"
+                              : "bg-zinc-900 text-zinc-400 border-zinc-700 hover:border-zinc-400"
                           }`}
                         >
-                          {val.metadata?.hex && (
+                          {hex && (
                             <span
-                              className="w-3 h-3 rounded-full border border-zinc-600 shrink-0"
-                              style={{ backgroundColor: val.metadata.hex }}
+                              className="w-3 h-3 rounded-full border border-zinc-400 shrink-0"
+                              style={{ backgroundColor: hex }}
                             />
                           )}
-                          {val.display_value}
+                          {val.display_value || val.value}
                         </button>
                       );
                     })}
@@ -858,33 +865,38 @@ function StepVariants({ selectedAttrs, onSelectedAttrsChange, variants, onVarian
             );
           })}
         </div>
+
+        {enabledCount > 0 && (
+          <div className="mt-5 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={buildVariants}
+              className="flex items-center gap-1.5 px-4 py-2 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-200 transition-colors"
+            >
+              <Sparkles size={13} />
+              Build {totalVariants} Variant{totalVariants !== 1 ? "s" : ""}
+            </button>
+            <span className="text-[11px] text-zinc-600">
+              Replaces any existing variants below
+            </span>
+          </div>
+        )}
       </SectionCard>
 
       <SectionCard title={`Variants (${variants.length})`}>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {canGenerate && (
-            <button
-              type="button"
-              onClick={generateCombinations}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-200 transition-colors"
-            >
-              <Sparkles size={13} />
-              Generate All Combinations
-            </button>
-          )}
+        <div className="flex justify-end mb-3">
           <button
             type="button"
             onClick={addBlankVariant}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-700 transition-colors"
           >
-            <Plus size={13} />
-            Add Variant
+            <Plus size={12} /> Add manually
           </button>
         </div>
 
         {variants.length === 0 ? (
           <div className="py-8 text-center text-zinc-600 text-xs border border-dashed border-zinc-800 rounded-lg">
-            No variants yet. Generate from attributes or add one manually.
+            Select age groups above and click &quot;Build Variants&quot;.
           </div>
         ) : (
           <div className="space-y-3">
@@ -893,6 +905,7 @@ function StepVariants({ selectedAttrs, onSelectedAttrsChange, variants, onVarian
                 key={row.id}
                 index={i}
                 row={row}
+                attributes={attributes}
                 onChange={(r) => updateVariant(row.id, r)}
                 onRemove={() => removeVariant(row.id)}
               />
@@ -906,7 +919,7 @@ function StepVariants({ selectedAttrs, onSelectedAttrsChange, variants, onVarian
 
 // ─── Step 3: Review ───────────────────────────────────────────────────────────
 
-function StepReview({ details, variants }: { details: ProductDetails; variants: VariantRow[] }) {
+function StepReview({ details, variants, attributes }: { details: ProductDetails; variants: VariantRow[]; attributes: AttributeDetail[] }) {
   const priceNums = variants.map((v) => parseFloat(v.price)).filter(Boolean);
   const minPrice  = priceNums.length ? Math.min(...priceNums) : null;
   const maxPrice  = priceNums.length ? Math.max(...priceNums) : null;
@@ -987,7 +1000,7 @@ function StepReview({ details, variants }: { details: ProductDetails; variants: 
                     <tr key={v.id} className="border-b border-zinc-800/50 last:border-b-0">
                       <td className="py-2.5 pr-4">
                         <div className="flex flex-wrap gap-1">
-                          {variantLabel(v.attribute_value_ids)
+                          {variantLabel(v.attribute_value_ids, attributes)
                             .split(" / ")
                             .map((part) => (
                               <span key={part} className="text-[10px] font-bold bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded">
@@ -1056,6 +1069,7 @@ export default function NewProductPage() {
   const [submitted, setSubmitted]     = useState(false);
   const [submitting, setSubmitting]   = useState(false);
   const { categories, loading: loadingCategories, createCategory } = useCategories();
+  const { attributes } = useAttributes();
 
   function handleNext() {
     const err = validateStep(step, details, variants);
@@ -1162,9 +1176,10 @@ export default function NewProductPage() {
             onSelectedAttrsChange={setSelectedAttrs}
             variants={variants}
             onVariantsChange={setVariants}
+            attributes={attributes}
           />
         )}
-        {step === 2 && <StepReview details={details} variants={variants} />}
+        {step === 2 && <StepReview details={details} variants={variants} attributes={attributes} />}
 
         {error && (
           <div className="mt-4 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs font-semibold text-red-400">
