@@ -54,7 +54,17 @@ function useAttributes() {
   useEffect(() => {
     api.attributes
       .list()
-      .then((res) => setAttributes(res.results))
+      .then((res) =>
+        Promise.all(
+          res.results.map((attr) =>
+            api.attributes
+              .listValues(attr.id)
+              .then((r) => ({ ...attr, values: r.results }))
+              .catch(() => ({ ...attr, values: [] }))
+          )
+        )
+      )
+      .then(setAttributes)
       .catch(() => setAttributes([]))
       .finally(() => setLoading(false));
   }, []);
@@ -72,11 +82,6 @@ interface ProductDetails {
   category: string;
   cover_image_url: string;
   is_active: boolean;
-}
-
-interface SelectedAttribute {
-  attribute_id: string;
-  value_ids: string[];
 }
 
 const AGE_GROUPS: { value: string; label: string }[] = [
@@ -113,14 +118,6 @@ function toSlug(name: string): string {
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-");
-}
-
-function cartesian<T>(arrays: T[][]): T[][] {
-  if (!arrays.length) return [[]];
-  return arrays.reduce<T[][]>(
-    (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])),
-    [[]]
-  );
 }
 
 function variantLabel(valueIds: string[], attributes: AttributeDetail[]): string {
@@ -1063,7 +1060,6 @@ const DEFAULT_DETAILS: ProductDetails = {
 export default function NewProductPage() {
   const [step, setStep]               = useState(0);
   const [details, setDetails]         = useState<ProductDetails>(DEFAULT_DETAILS);
-  const [selectedAttrs, setSelectedAttrs] = useState<SelectedAttribute[]>([]);
   const [variants, setVariants]       = useState<VariantRow[]>([]);
   const [error, setError]             = useState<string | null>(null);
   const [submitted, setSubmitted]     = useState(false);
@@ -1133,7 +1129,7 @@ export default function NewProductPage() {
               Back to Products
             </Link>
             <button
-              onClick={() => { setStep(0); setDetails(DEFAULT_DETAILS); setSelectedAttrs([]); setVariants([]); setSubmitted(false); }}
+              onClick={() => { setStep(0); setDetails(DEFAULT_DETAILS); setVariants([]); setSubmitted(false); }}
               className="px-5 py-2.5 bg-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-700 transition-colors"
             >
               Add Another
@@ -1172,8 +1168,6 @@ export default function NewProductPage() {
         )}
         {step === 1 && (
           <StepVariants
-            selectedAttrs={selectedAttrs}
-            onSelectedAttrsChange={setSelectedAttrs}
             variants={variants}
             onVariantsChange={setVariants}
             attributes={attributes}

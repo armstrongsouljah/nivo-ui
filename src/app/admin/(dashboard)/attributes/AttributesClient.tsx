@@ -6,6 +6,7 @@ import type { AttributeDetail, AttributeValueItem } from "@/lib/api";
 import {
   createAttributeAction,
   deleteAttributeAction,
+  getAttributeValuesAction,
   createAttributeValueAction,
   deleteAttributeValueAction,
 } from "./actions";
@@ -158,11 +159,31 @@ function AttributeRow({
   attribute: AttributeDetail;
   onDeleted: (id: string) => void;
 }) {
-  const [expanded, setExpanded]   = useState(false);
-  const [values, setValues]       = useState<AttributeValueItem[]>(attribute.values ?? []);
-  const [addingValue, setAddingValue] = useState(false);
-  const [deleting, setDeleting]   = useState(false);
-  const [error, setError]         = useState<string | null>(null);
+  const [expanded, setExpanded]           = useState(false);
+  const [values, setValues]               = useState<AttributeValueItem[]>(attribute.values ?? []);
+  const [count, setCount]                 = useState(attribute.value_count ?? 0);
+  const [loadingValues, setLoadingValues] = useState(false);
+  const [valuesFetched, setValuesFetched] = useState(false);
+  const [addingValue, setAddingValue]     = useState(false);
+  const [deleting, setDeleting]           = useState(false);
+  const [error, setError]                 = useState<string | null>(null);
+
+  async function handleExpand() {
+    const next = !expanded;
+    setExpanded(next);
+    if (next && !valuesFetched) {
+      setLoadingValues(true);
+      try {
+        const fetched = await getAttributeValuesAction(attribute.id);
+        setValues(fetched);
+        setValuesFetched(true);
+      } catch {
+        setError("Failed to load values.");
+      } finally {
+        setLoadingValues(false);
+      }
+    }
+  }
 
   async function handleDeleteAttr() {
     if (!confirm(`Delete "${attribute.name}" and all its values? This cannot be undone.`)) return;
@@ -180,6 +201,7 @@ function AttributeRow({
     try {
       await deleteAttributeValueAction(attribute.id, valueId);
       setValues((prev) => prev.filter((v) => v.id !== valueId));
+      setCount((c) => c - 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete value.");
     }
@@ -191,7 +213,7 @@ function AttributeRow({
       <div className="flex items-center justify-between px-5 py-4">
         <button
           type="button"
-          onClick={() => setExpanded((p) => !p)}
+          onClick={handleExpand}
           className="flex items-center gap-2 text-left flex-1 min-w-0"
         >
           {expanded ? (
@@ -201,7 +223,7 @@ function AttributeRow({
           )}
           <span className="text-sm font-bold text-white truncate">{attribute.name}</span>
           <span className="text-[11px] text-zinc-500 shrink-0">
-            {values.length} value{values.length !== 1 ? "s" : ""}
+            {count} value{count !== 1 ? "s" : ""}
           </span>
         </button>
         <button
@@ -251,7 +273,11 @@ function AttributeRow({
             </div>
           )}
 
-          {values.length === 0 && !addingValue && (
+          {loadingValues && (
+            <Loader2 size={14} className="animate-spin text-zinc-500" />
+          )}
+
+          {!loadingValues && values.length === 0 && !addingValue && (
             <p className="text-xs text-zinc-600 italic">No values yet.</p>
           )}
 
@@ -259,7 +285,7 @@ function AttributeRow({
           {addingValue ? (
             <AddValueForm
               attributeId={attribute.id}
-              onAdded={(v) => { setValues((prev) => [...prev, v]); setAddingValue(false); }}
+              onAdded={(v) => { setValues((prev) => [...prev, v]); setCount((c) => c + 1); setAddingValue(false); }}
               onCancel={() => setAddingValue(false)}
             />
           ) : (

@@ -17,11 +17,20 @@ export default async function EditProductPage({
 
   if (!product) notFound();
 
+  const attributes = await Promise.all(
+    attributesRes.results.map((attr) =>
+      serverApi.attributes
+        .listValues(attr.id)
+        .then((r) => ({ ...attr, values: r.results }))
+        .catch(() => ({ ...attr, values: [] }))
+    )
+  );
+
   return (
     <EditProductClient
       product={product}
       initialCategories={categoriesRes.results}
-      attributes={attributesRes.results}
+      attributes={attributes}
     />
   );
 }

@@ -91,6 +91,7 @@ export interface AttributeDetail {
   id: string;
   name: string;
   slug: string;
+  value_count: number;
   values: AttributeValueItem[];
 }
 
@@ -190,7 +191,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   attributes: {
     list: () =>
-      request<PaginatedResponse<AttributeDetail>>("/products/attributes/?page_size=100"),
+      request<PaginatedResponse<AttributeDetail>>("/attributes/?page_size=100"),
+    listValues: (attributeId: string) =>
+      request<PaginatedResponse<AttributeValueItem>>(`/attribute-values/?attribute_pk=${attributeId}`),
   },
   featuredCollections: {
     list: () =>
@@ -200,18 +203,18 @@ export const api = {
   },
   categories: {
     list: () =>
-      request<PaginatedResponse<Category>>("/products/categories/?page_size=100"),
+      request<PaginatedResponse<Category>>("/categories/?page_size=100"),
     create: (name: string) =>
-      request<CategoryDetail>("/products/categories/", {
+      request<CategoryDetail>("/categories/", {
         method: "POST",
         body: JSON.stringify({ name }),
       }),
     update: (id: string, name: string) =>
-      request<CategoryDetail>(`/products/categories/${id}/`, {
+      request<CategoryDetail>(`/categories/${id}/`, {
         method: "PATCH",
         body: JSON.stringify({ name }),
       }),
     delete: (id: string) =>
-      request<void>(`/products/categories/${id}/`, { method: "DELETE" }),
+      request<void>(`/categories/${id}/`, { method: "DELETE" }),
   },
 };

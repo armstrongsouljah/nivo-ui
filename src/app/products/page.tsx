@@ -20,7 +20,7 @@ export default async function ProductsPage({
   const page = typeof sp.page === "string" ? Math.max(1, parseInt(sp.page, 10)) : 1;
 
   const [productsData, categoriesData] = await Promise.all([
-    serverApi.products.list({ page_size: PAGE_SIZE, page, search: q, category }).catch(() => ({ results: [], count: 0, next: null, previous: null })),
+    serverApi.products.list({is_active:true, page_size: PAGE_SIZE, page, search: q, category }).catch(() => ({ results: [], count: 0, next: null, previous: null })),
     serverApi.categories.list().catch(() => ({ results: [], count: 0, next: null, previous: null })),
   ]);
 

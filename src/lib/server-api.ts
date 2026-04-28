@@ -32,37 +32,39 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const serverApi = {
   attributes: {
     list: () =>
-      request<PaginatedResponse<AttributeDetail>>("/products/attributes/?page_size=100"),
+      request<PaginatedResponse<AttributeDetail>>("/attributes/?page_size=100"),
     create: (name: string) =>
-      request<AttributeDetail>("/products/attributes/", {
+      request<AttributeDetail>("/attributes/", {
         method: "POST",
         body: JSON.stringify({ name }),
       }),
     delete: (id: string) =>
-      request<void>(`/products/attributes/${id}/`, { method: "DELETE" }),
+      request<void>(`/attributes/${id}/`, { method: "DELETE" }),
+    listValues: (attributeId: string) =>
+      request<PaginatedResponse<AttributeValueItem>>(`/attribute-values/?attribute_pk=${attributeId}`),
     createValue: (attributeId: string, payload: { value: string; display_value: string; metadata?: Record<string, string> }) =>
-      request<AttributeValueItem>(`/products/attributes/${attributeId}/values/`, {
+      request<AttributeValueItem>("/attribute-values/", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ attribute: attributeId, ...payload }),
       }),
-    deleteValue: (attributeId: string, valueId: string) =>
-      request<void>(`/products/attributes/${attributeId}/values/${valueId}/`, { method: "DELETE" }),
+    deleteValue: (_attributeId: string, valueId: string) =>
+      request<void>(`/attribute-values/${valueId}/`, { method: "DELETE" }),
   },
   categories: {
     list: () =>
-      request<PaginatedResponse<Category>>("/products/categories/?page_size=100"),
+      request<PaginatedResponse<Category>>("/categories/?page_size=100"),
     create: (name: string) =>
-      request<CategoryDetail>("/products/categories/", {
+      request<CategoryDetail>("/categories/", {
         method: "POST",
         body: JSON.stringify({ name }),
       }),
     update: (id: string, name: string) =>
-      request<CategoryDetail>(`/products/categories/${id}/`, {
+      request<CategoryDetail>(`/categories/${id}/`, {
         method: "PATCH",
         body: JSON.stringify({ name }),
       }),
     delete: (id: string) =>
-      request<void>(`/products/categories/${id}/`, { method: "DELETE" }),
+      request<void>(`/categories/${id}/`, { method: "DELETE" }),
   },
   products: {
     list: (params?: { page_size?: number; page?: number; search?: string; category?: string; new_arrivals?: boolean; is_active?: boolean }) => {
@@ -90,30 +92,30 @@ export const serverApi = {
         body: JSON.stringify(payload),
       }),
     createVariant: (productId: string, payload: VariantCreatePayload) =>
-      request<void>(`/products/${productId}/variants/`, {
+      request<void>("/product-variants/", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ product: productId, ...payload }),
       }),
     updateVariant: (productId: string, variantId: string, payload: VariantUpdatePayload) =>
-      request<void>(`/products/${productId}/variants/${variantId}/`, {
+      request<void>(`/product-variants/${variantId}/?product_pk=${productId}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       }),
     deleteVariant: (productId: string, variantId: string) =>
-      request<void>(`/products/${productId}/variants/${variantId}/`, { method: "DELETE" }),
+      request<void>(`/product-variants/${variantId}/?product_pk=${productId}`, { method: "DELETE" }),
     addGalleryImage: (productId: string, payload: { url: string; alt_text?: string; position?: number }) =>
-      request<GalleryImage>(`/products/${productId}/gallery/`, {
+      request<GalleryImage>("/product-gallery/", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ product: productId, ...payload }),
       }),
     deleteGalleryImage: (productId: string, imageId: string) =>
-      request<void>(`/products/${productId}/gallery/${imageId}/`, { method: "DELETE" }),
+      request<void>(`/product-gallery/${imageId}/?product_pk=${productId}`, { method: "DELETE" }),
   },
   featuredCollections: {
     list: () =>
       request<PaginatedResponse<FeaturedCollectionSummary>>("/products/featured-collections/?page_size=50"),
     get: (slug: string) =>
-      request<FeaturedCollectionDetail>(`/products/featured-collections/${slug}`),
+      request<FeaturedCollectionDetail>(`/products/featured-collections/${slug}/`),
     create: (payload: FeaturedCollectionCreatePayload) =>
       request<FeaturedCollectionDetail>("/products/featured-collections/", {
         method: "POST",

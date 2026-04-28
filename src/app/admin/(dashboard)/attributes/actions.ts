@@ -11,6 +11,10 @@ export async function deleteAttributeAction(id: string): Promise<void> {
   return serverApi.attributes.delete(id);
 }
 
+export async function getAttributeValuesAction(attributeId: string): Promise<AttributeValueItem[]> {
+  return serverApi.attributes.listValues(attributeId).then((r) => r.results);
+}
+
 export async function createAttributeValueAction(
   attributeId: string,
   payload: { value: string; display_value: string; metadata?: Record<string, string> },
