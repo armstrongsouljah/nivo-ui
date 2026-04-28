@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { logoutAction } from "@/app/admin/login/actions";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -14,21 +15,36 @@ import {
   Menu,
   X,
   Tag,
+  Store,
+  Palette,
+  Layers,
+  FolderOpen,
 } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard",  href: "/admin",          icon: LayoutDashboard },
-  { label: "Orders",     href: "/admin/orders",   icon: ShoppingBag },
-  { label: "Products",   href: "/admin/products", icon: Package },
-  { label: "Customers",  href: "/admin/customers",icon: Users },
-  { label: "Promotions", href: "/admin/promos",   icon: Tag },
-  { label: "Analytics",  href: "/admin/analytics",icon: BarChart2 },
-  { label: "Settings",   href: "/admin/settings", icon: Settings },
+  { label: "Dashboard",    href: "/admin",               icon: LayoutDashboard },
+  { label: "Orders",       href: "/admin/orders",        icon: ShoppingBag },
+  { label: "Products",     href: "/admin/products",      icon: Package },
+  { label: "Categories",   href: "/admin/categories",    icon: FolderOpen },
+  { label: "Collections",  href: "/admin/collections",   icon: Layers },
+  { label: "Attributes",   href: "/admin/attributes",    icon: Palette },
+  { label: "Customers",    href: "/admin/customers",     icon: Users },
+  { label: "Promotions",   href: "/admin/promos",        icon: Tag },
+  { label: "Analytics",    href: "/admin/analytics",     icon: BarChart2 },
+  { label: "Settings",     href: "/admin/settings",      icon: Settings },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    setLoggingOut(true);
+    await logoutAction();
+    router.push("/admin/login");
+  }
 
   return (
     <>
@@ -93,14 +109,23 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="px-3 pb-5 border-t border-zinc-800 pt-4 shrink-0">
+        <div className="px-3 pb-5 border-t border-zinc-800 pt-4 shrink-0 space-y-0.5">
           <Link
             href="/"
             className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
           >
-            <LogOut size={16} />
+            <Store size={16} />
             Back to Store
           </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+          >
+            <LogOut size={16} />
+            {loggingOut ? "Signing out…" : "Sign Out"}
+          </button>
         </div>
       </aside>
     </>

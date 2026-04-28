@@ -1,11 +1,17 @@
-import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { featuredCollections } from "@/data/products";
+import { api } from "@/lib/api";
 
-export default function FeaturedCollections() {
+export default async function FeaturedCollections() {
+  const collections = await api.featuredCollections
+    .list()
+    .then((r) => r.results.filter((c) => c.is_active))
+    .catch(() => []);
+
+  if (collections.length === 0) return null;
+
   return (
     <section id="collections" className="px-4 sm:px-6 py-12 sm:py-16 max-w-7xl mx-auto w-full">
-      {/* Header */}
       <div className="mb-7">
         <p className="text-[11px] font-bold tracking-[0.2em] text-zinc-400 uppercase mb-1">
           Browse By Style
@@ -15,34 +21,34 @@ export default function FeaturedCollections() {
         </h2>
       </div>
 
-      {/* Collections grid */}
-      {/* Mobile: 2-col equal. Desktop: asymmetric layout */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {featuredCollections.map((col, i) => {
-          // First item spans full width on mobile, 2 cols on lg
+        {collections.map((col, i) => {
           const isHero = i === 0;
           return (
-            <div
-              key={col.id}
-              className={`relative group overflow-hidden cursor-pointer ${
-                isHero ? "col-span-2 lg:col-span-2 aspect-[16/9] lg:aspect-[3/2]" : "aspect-square"
+            <Link
+              key={col.slug}
+              href={`/collections/${col.slug}`}
+              className={`relative group overflow-hidden cursor-pointer block ${
+                isHero ? "col-span-2 lg:col-span-2 aspect-video lg:aspect-3/2" : "aspect-square"
               }`}
             >
-              <Image
-                src={col.image}
-                alt={col.name}
-                fill
-                className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                sizes={isHero ? "(max-width: 1024px) 100vw, 66vw" : "(max-width: 640px) 50vw, 33vw"}
-              />
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+              {col.cover_image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={col.cover_image_url}
+                  alt={col.name}
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-zinc-200" />
+              )}
 
-              {/* Label */}
+              <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
+
               <div className="absolute bottom-0 left-0 p-4 sm:p-5 flex items-end justify-between w-full">
                 <div>
                   <p className="text-[10px] text-zinc-300 tracking-widest uppercase mb-0.5">
-                    {col.itemCount} items
+                    {col.product_count} item{col.product_count !== 1 ? "s" : ""}
                   </p>
                   <h3 className="text-white font-black text-base sm:text-lg uppercase tracking-tight">
                     {col.name}
@@ -52,7 +58,7 @@ export default function FeaturedCollections() {
                   <ArrowRight size={14} className="text-white group-hover:text-black" />
                 </span>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
