@@ -736,7 +736,7 @@ export default function EditProductClient({
   const [categories, setCategories]     = useState<Category[]>(initialCategories);
 
   // ── Variants state ───────────────────────────────────────────────────────
-  const [variants, setVariants]   = useState<ProductVariantDetail[]>(product.variants);
+  const [variants, setVariants]   = useState<ProductVariantDetail[]>(product.variants ?? []);
   const [addingVariant, setAddingVariant] = useState(false);
 
   // IDs
