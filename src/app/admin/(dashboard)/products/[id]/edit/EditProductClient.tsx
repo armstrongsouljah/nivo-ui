@@ -112,6 +112,7 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
     setProgress(0);
     try {
       const sig = await getUploadSignature("products/covers");
+      if (!sig.ok) { setError(sig.error); setUploading(false); return; }
       const body = new FormData();
       body.append("file", file);
       body.append("api_key", sig.api_key);
@@ -595,6 +596,7 @@ function GalleryManager({ productId, initial }: { productId: string; initial: Ga
       setProgress(0);
       try {
         const sig = await getUploadSignature("gallery");
+        if (!sig.ok) { setError(sig.error); setUploading(false); break; }
         const body = new FormData();
         body.append("file", file);
         body.append("api_key", sig.api_key);

@@ -166,6 +166,7 @@ function ImageUpload({
 
     try {
       const sig = await getUploadSignature(folder);
+      if (!sig.ok) { setUploadError(sig.error); setState("error"); return; }
 
       const body = new FormData();
       body.append("file", file);

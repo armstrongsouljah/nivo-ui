@@ -25,6 +25,7 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
     setProgress(0);
     try {
       const sig = await getUploadSignature("collections");
+      if (!sig.ok) { setUploadError(sig.error); setState("error"); return; }
       const body = new FormData();
       body.append("file", file);
       body.append("api_key", sig.api_key);

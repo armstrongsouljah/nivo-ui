@@ -10,6 +10,7 @@ async function getAuthHeader(): Promise<Record<string, string>> {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  if (!BASE_URL) throw new Error("NEXT_PUBLIC_API_URL is not configured");
   const auth = await getAuthHeader();
   const res = await fetch(`${BASE_URL}${path}`, {
     ...init,

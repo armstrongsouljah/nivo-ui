@@ -269,6 +269,7 @@ export interface VariantUpdatePayload {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  if (!BASE_URL) throw new Error("NEXT_PUBLIC_API_URL is not configured");
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { "Content-Type": "application/json", ...init?.headers },
     ...init,
