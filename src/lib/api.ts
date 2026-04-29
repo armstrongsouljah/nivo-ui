@@ -7,6 +7,18 @@ export interface PaginatedResponse<T> {
   count?: number;
 }
 
+export interface AdminProfile {
+  id:                string;
+  email:             string;
+  first_name:        string;
+  last_name:         string;
+  full_name:         string;
+  phone:             string;
+  role:              string;
+  is_email_verified: boolean;
+  date_joined:       string;
+}
+
 export interface Category {
   id: string;
   name: string;
@@ -104,6 +116,88 @@ export interface ProductVariantDetail {
   age_group: string;
   is_active: boolean;
   attributes: VariantAttribute[];
+}
+
+export interface ShippingAddress {
+  full_name:      string;
+  phone:          string;
+  address_line_1: string;
+  address_line_2?: string;
+  city:           string;
+  country:        string;
+}
+
+export interface OrderItemPayload {
+  product_variant?: string;
+  price_at_purchase: string;
+  quantity:          number;
+  variant_label:     string;
+}
+
+export interface OrderCreatePayload {
+  total_price:      string;
+  shipping_cost?:   string;
+  tax_amount?:      string;
+  shipping_address: ShippingAddress;
+  items:            OrderItemPayload[];
+}
+
+export interface OrderItemDetail {
+  id:                string;
+  product:           string | null;
+  product_variant:   string | null;
+  price_at_purchase: string;
+  quantity:          number;
+  variant_label:     string;
+  subtotal:          number;
+}
+
+export interface OrderSummary {
+  id:           string;
+  secure_code:  string | null;
+  status:       string;
+  is_paid:      boolean;
+  total_price:  string;
+  shipping_cost: string;
+  created_at:   string;
+  user:         string | null;
+}
+
+export interface OrderDetail extends OrderSummary {
+  tax_amount:       string;
+  shipping_address: ShippingAddress;
+  items:            OrderItemDetail[];
+  updated_at:       string;
+}
+
+export interface OrderResponse {
+  id:               string;
+  secure_code:      string | null;
+  status:           string;
+  is_paid:          boolean;
+  total_price:      string;
+  shipping_cost:    string;
+  shipping_address: ShippingAddress;
+  created_at:       string;
+}
+
+export interface CartItemPayload {
+  product_variant: string;
+  quantity: number;
+}
+
+export interface CartItemResponse {
+  id: string;
+  cart: string;
+  product_variant: string;
+  quantity: number;
+}
+
+export interface CartResponse {
+  id: string;
+  user: string | null;
+  items: CartItemResponse[];
+  total_price: string;
 }
 
 export interface FeaturedCollectionSummary {
@@ -216,5 +310,30 @@ export const api = {
       }),
     delete: (id: string) =>
       request<void>(`/categories/${id}/`, { method: "DELETE" }),
+  },
+  cart: {
+    get: (id: string) =>
+      request<CartResponse>(`/cart/${id}`),
+    create: (items: CartItemPayload[]) =>
+      request<CartResponse>("/cart/", {
+        method: "POST",
+        body: JSON.stringify({ items }),
+      }),
+    update: (id: string, items: CartItemPayload[]) =>
+      request<CartResponse>(`/cart/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ items }),
+      }),
+    delete: (id: string) =>
+      request<void>(`/cart/${id}`, { method: "DELETE" }),
+  },
+  orders: {
+    create: (payload: OrderCreatePayload) =>
+      request<OrderResponse>("/orders/", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    get: (id: string) =>
+      request<OrderResponse>(`/orders/${id}/`),
   },
 };

@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload } from "./api";
+import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, AdminProfile } from "./api";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL!.replace(/\/$/, "");
 
@@ -128,5 +128,58 @@ export const serverApi = {
       }),
     delete: (slug: string) =>
       request<void>(`/products/featured-collections/${slug}`, { method: "DELETE" }),
+  },
+  orders: {
+    list: (params?: { status?: string; page?: number; page_size?: number }) => {
+      const qs = new URLSearchParams();
+      qs.set("page_size", String(params?.page_size ?? 50));
+      if (params?.page && params.page > 1) qs.set("page", String(params.page));
+      if (params?.status) qs.set("status", params.status);
+      return request<PaginatedResponse<OrderSummary>>(`/orders/?${qs}`);
+    },
+    get: (id: string) =>
+      request<OrderDetail>(`/orders/${id}/`),
+    update: (id: string, payload: { status?: string; is_paid?: boolean }) =>
+      request<OrderDetail>(`/orders/${id}/`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    stats: () =>
+      request<Record<string, number>>("/orders/stats/"),
+    revenue: () =>
+      request<{ month: string; revenue: number; orders: number }[]>("/orders/revenue/"),
+    kpi: () =>
+      request<{
+        revenue:   { value: number; change: number };
+        orders:    { value: number; change: number };
+        customers: { value: number; change: number };
+        avg_order: { value: number; change: number };
+      }>("/orders/kpi/"),
+    analytics: (period: number = 30) =>
+      request<{
+        period_days: number;
+        totals:      { revenue: number; orders: number; avg_order: number };
+        trend:       { date: string; revenue: number; orders: number }[];
+        top_products: { label: string; revenue: number; quantity: number }[];
+        top_cities:  { city: string; orders: number }[];
+        fulfillment: {
+          total: number; delivered: number; in_progress: number;
+          pending: number; cancelled: number; rate: number;
+        };
+      }>(`/orders/analytics/?period=${period}`),
+  },
+  auth: {
+    profile: () =>
+      request<AdminProfile>("/auth/profile/"),
+    updateProfile: (payload: { first_name?: string; last_name?: string; phone?: string }) =>
+      request<AdminProfile>("/auth/profile/", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    changePassword: (payload: { current_password: string; new_password: string; confirm_new_password: string }) =>
+      request<void>("/auth/password/change/", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
   },
 };

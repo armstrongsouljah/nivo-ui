@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { ShoppingBag, Search, Menu, X } from "lucide-react";
+import { useCart } from "@/context/cart-context";
 
 const navLinks = ["New Arrivals", "Collections", "Sale", "About"];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { totalCount, openCart } = useCart();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm">
@@ -40,12 +42,15 @@ export default function Navbar() {
             </button>
             <button
               aria-label="Cart"
+              onClick={openCart}
               className="relative text-zinc-300 hover:text-white transition-colors"
             >
               <ShoppingBag size={20} />
-              <span className="absolute -top-1.5 -right-1.5 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                0
-              </span>
+              {totalCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {totalCount > 99 ? "99+" : totalCount}
+                </span>
+              )}
             </button>
             {/* Hamburger — mobile only */}
             <button
