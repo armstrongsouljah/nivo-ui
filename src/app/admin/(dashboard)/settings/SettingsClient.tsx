@@ -115,6 +115,30 @@ function ProfileSection({ profile, onUpdated }: {
   );
 }
 
+// ─── Password input (module-level to keep identity stable across re-renders) ──
+
+function PasswordInput({ id, value, onChange, show, onToggle, placeholder }: {
+  id: string; value: string; onChange: (v: string) => void;
+  show: boolean; onToggle: () => void; placeholder: string;
+}) {
+  return (
+    <div className="relative">
+      <input
+        id={id} type={show ? "text" : "password"} value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`${inputCls} pr-10`}
+      />
+      <button
+        type="button" onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+      >
+        {show ? <EyeOff size={15} /> : <Eye size={15} />}
+      </button>
+    </div>
+  );
+}
+
 // ─── Password section ─────────────────────────────────────────────────────────
 
 function PasswordSection() {
@@ -142,28 +166,6 @@ function PasswordSection() {
     } finally {
       setSaving(false);
     }
-  }
-
-  function PasswordInput({ id, value, onChange, show, onToggle, placeholder }: {
-    id: string; value: string; onChange: (v: string) => void;
-    show: boolean; onToggle: () => void; placeholder: string;
-  }) {
-    return (
-      <div className="relative">
-        <input
-          id={id} type={show ? "text" : "password"} value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={`${inputCls} pr-10`}
-        />
-        <button
-          type="button" onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
-        >
-          {show ? <EyeOff size={15} /> : <Eye size={15} />}
-        </button>
-      </div>
-    );
   }
 
   return (

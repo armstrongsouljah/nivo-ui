@@ -113,21 +113,21 @@ export const serverApi = {
   },
   featuredCollections: {
     list: () =>
-      request<PaginatedResponse<FeaturedCollectionSummary>>("/products/featured-collections/?page_size=50"),
+      request<PaginatedResponse<FeaturedCollectionSummary>>("/featured-collections/?page_size=50"),
     get: (slug: string) =>
-      request<FeaturedCollectionDetail>(`/products/featured-collections/${slug}/`),
+      request<FeaturedCollectionDetail>(`/featured-collections/${slug}/`),
     create: (payload: FeaturedCollectionCreatePayload) =>
-      request<FeaturedCollectionDetail>("/products/featured-collections/", {
+      request<FeaturedCollectionDetail>("/featured-collections/", {
         method: "POST",
         body: JSON.stringify(payload),
       }),
     update: (slug: string, payload: FeaturedCollectionUpdatePayload) =>
-      request<FeaturedCollectionDetail>(`/products/featured-collections/${slug}`, {
+      request<FeaturedCollectionDetail>(`/featured-collections/${slug}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       }),
     delete: (slug: string) =>
-      request<void>(`/products/featured-collections/${slug}`, { method: "DELETE" }),
+      request<void>(`/featured-collections/${slug}`, { method: "DELETE" }),
   },
   orders: {
     list: (params?: { status?: string; page?: number; page_size?: number }) => {
