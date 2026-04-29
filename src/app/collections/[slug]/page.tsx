@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import StoreProductCard from "@/components/StoreProductCard";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/server-api";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -14,7 +14,7 @@ interface Props {
 export default async function CollectionDetailPage({ params }: Props) {
   const { slug } = await params;
 
-  const collection = await api.featuredCollections.get(slug).catch(() => null);
+  const collection = await serverApi.featuredCollections.get(slug).catch(() => null);
 
   if (!collection || !collection.is_active) notFound();
 

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/server-api";
 
 export default async function FeaturedCollections() {
-  const collections = await api.featuredCollections
+  const collections = await serverApi.featuredCollections
     .list()
     .then((r) => r.results.filter((c) => c.is_active))
     .catch(() => []);

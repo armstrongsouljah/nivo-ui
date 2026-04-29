@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, AdminProfile } from "./api";
+import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile } from "./api";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
 
@@ -138,6 +138,11 @@ export const serverApi = {
       if (params?.status) qs.set("status", params.status);
       return request<PaginatedResponse<OrderSummary>>(`/orders/?${qs}`);
     },
+    create: (payload: OrderCreatePayload) =>
+      request<OrderResponse>("/orders/", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
     get: (id: string) =>
       request<OrderDetail>(`/orders/${id}/`),
     update: (id: string, payload: { status?: string; is_paid?: boolean }) =>

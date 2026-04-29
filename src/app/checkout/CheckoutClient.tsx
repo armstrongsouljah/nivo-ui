@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, Loader2 } from "lucide-react";
 import { useCart } from "@/context/cart-context";
-import { api } from "@/lib/api";
 import type { ShippingAddress } from "@/lib/api";
+import { createOrderAction } from "./actions";
 
 function fmtPrice(price: string | number) {
   const n = typeof price === "string" ? parseFloat(price) : price;
@@ -65,7 +65,7 @@ export default function CheckoutClient() {
     setError(null);
     setSubmitting(true);
     try {
-      const order = await api.orders.create({
+      const order = await createOrderAction({
         total_price:      String(subtotal),
         shipping_address: address,
         items: items.map((i) => ({
