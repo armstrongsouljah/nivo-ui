@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, AdminProfile } from "./api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL!.replace(/\/$/, "");
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const cookieStore = await cookies();
