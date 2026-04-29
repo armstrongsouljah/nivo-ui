@@ -2,9 +2,9 @@ import crypto from "crypto";
 
 function parseCloudinaryUrl() {
   const url = process.env.CLOUDINARY_URL;
-  if (!url) throw new Error("CLOUDINARY_URL is not set");
+  if (!url) throw new Error("CLOUDINARY_URL environment variable is not configured.");
   const match = url.match(/^cloudinary:\/\/(\d+):([^@]+)@(.+)$/);
-  if (!match) throw new Error("Invalid CLOUDINARY_URL format");
+  if (!match) throw new Error("CLOUDINARY_URL format is invalid. Expected cloudinary://apiKey:apiSecret@cloudName");
   return { apiKey: match[1], apiSecret: match[2], cloudName: match[3] };
 }
 
