@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ShoppingBag, Check } from "lucide-react";
 import type { ProductDetail, AgeGroupOptions, VariantOption } from "@/lib/api";
 import ProductImageViewer from "@/components/ProductImageViewer";
+import { useCart } from "@/context/cart-context";
 
 function fmtPrice(price: string) {
   return `UGX ${parseFloat(price).toLocaleString("en-UG")}`;
@@ -58,6 +59,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   );
   const [selectedColorValue, setSelectedColorValue] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
+  const { addToCart } = useCart();
 
   const selectedGroup = groups.find((g) => g.age_group === selectedAge) ?? null;
   const colorChoices = selectedGroup ? colorsForGroup(selectedGroup) : [];
@@ -89,9 +91,17 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
 
   function handleAddToCart() {
     if (!selectedOption || !selectedOption.in_stock) return;
+    const colorDisplay = colorChoices.find((c) => c.value === selectedColorValue)?.display;
+    const labelParts = [selectedGroup?.age_group_display, colorDisplay].filter(Boolean);
+    addToCart({
+      variantId: selectedOption.variant_id,
+      name:      product.name,
+      label:     labelParts.join(" / "),
+      price:     selectedOption.price,
+      imageUrl:  product.cover_image_url ?? undefined,
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
-    // TODO: dispatch to cart store
   }
 
   // Price display
