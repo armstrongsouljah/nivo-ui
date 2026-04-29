@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.gitignore
+
+# local env files — Cloud Run env vars are set in the console / gcloud CLI
+.env*.local
+.env
+
+# dev/editor artefacts
+*.md
+.DS_Store
