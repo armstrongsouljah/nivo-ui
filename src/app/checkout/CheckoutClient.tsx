@@ -64,24 +64,24 @@ export default function CheckoutClient() {
     if (err) { setError(err); return; }
     setError(null);
     setSubmitting(true);
-    try {
-      const order = await createOrderAction({
-        total_price:      String(subtotal),
-        shipping_address: address,
-        items: items.map((i) => ({
-          product_variant:   i.variant_id,
-          price_at_purchase: i.price,
-          quantity:          i.quantity,
-          variant_label:     i.label,
-        })),
-      });
-      await clearCart();
-      const qs = order.secure_code ? `?code=${order.secure_code}` : "";
-      router.push(`/order-confirmation/${order.id}${qs}`);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to place order. Please try again.");
+    const result = await createOrderAction({
+      total_price:      String(subtotal),
+      shipping_address: address,
+      items: items.map((i) => ({
+        product_variant:   i.variant_id,
+        price_at_purchase: i.price,
+        quantity:          i.quantity,
+        variant_label:     i.label,
+      })),
+    });
+    if (!result.ok) {
+      setError(result.error);
       setSubmitting(false);
+      return;
     }
+    await clearCart();
+    const qs = result.order.secure_code ? `?code=${result.order.secure_code}` : "";
+    router.push(`/order-confirmation/${result.order.id}${qs}`);
   }
 
   if (items.length === 0 && !submitting) {
