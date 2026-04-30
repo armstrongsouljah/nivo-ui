@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { parseDjangoError } from "./parse-api-error";
 import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile } from "./api";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
@@ -22,8 +23,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    throw new Error(text || `Request failed: ${res.status}`);
+    const text = await res.text().catch(() => "");
+    throw new Error(parseDjangoError(text, res.status));
   }
 
   if (res.status === 204) return undefined as T;

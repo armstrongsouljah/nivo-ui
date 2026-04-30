@@ -1,3 +1,5 @@
+import { parseDjangoError } from "./parse-api-error";
+
 const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
 
 export interface PaginatedResponse<T> {
@@ -275,8 +277,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    throw new Error(text || `Request failed: ${res.status}`);
+    const text = await res.text().catch(() => "");
+    throw new Error(parseDjangoError(text, res.status));
   }
   // 204 No Content
   if (res.status === 204) return undefined as T;
