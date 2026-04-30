@@ -37,7 +37,7 @@ export default async function OrderConfirmationPage({
           {code && (
             <div className="bg-zinc-900 rounded-xl px-6 py-5 mb-4 text-center">
               <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
-                Your Order Code
+                Your Order Reference Code
               </p>
               <p className="text-3xl font-black text-white tracking-[0.25em]">{code}</p>
               <p className="text-[11px] text-zinc-500 mt-2">
@@ -45,14 +45,6 @@ export default async function OrderConfirmationPage({
               </p>
             </div>
           )}
-
-          {/* UUID — secondary reference */}
-          <div className="bg-zinc-50 rounded-lg px-4 py-3 mb-6 text-left">
-            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">
-              Order Reference
-            </p>
-            <p className="text-[11px] font-mono text-zinc-500 break-all">{id}</p>
-          </div>
 
           <p className="text-[11px] text-zinc-400 mb-6">
             Payment is collected on delivery. You&apos;ll receive a call to confirm your order.
