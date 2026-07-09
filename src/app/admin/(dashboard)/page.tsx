@@ -11,7 +11,7 @@ export default async function AdminDashboard() {
     serverApi.products.list({ page_size: 5 }).then((r) => r.results).catch(() => []),
     serverApi.orders.list({ page_size: 10 }).then((r) => r.results).catch(() => []),
     serverApi.orders.stats().catch(() => ({} as Record<string, number>)),
-    serverApi.orders.revenue().catch(() => [] as { month: string; revenue: number; orders: number }[]),
+    serverApi.orders.revenue().catch(() => [] as { month: string; revenue: number; order_revenue: number; sales_revenue: number; orders: number }[]),
     serverApi.orders.kpi().catch(() => null),
   ]);
 

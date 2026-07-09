@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TrendingUp, ShoppingBag, DollarSign, MapPin, Package, CheckCircle } from "lucide-react";
+import { TrendingUp, ShoppingBag, DollarSign, MapPin, Package, CheckCircle, Receipt } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface AnalyticsData {
   period_days: number;
-  totals:      { revenue: number; orders: number; avg_order: number };
+  totals:      { revenue: number; order_revenue: number; sales_revenue: number; orders: number; avg_order: number };
   trend:       { date: string; revenue: number; orders: number }[];
   top_products: { label: string; revenue: number; quantity: number }[];
   top_cities:  { city: string; orders: number }[];
@@ -266,10 +266,11 @@ export default function AnalyticsClient({
         <div className="space-y-4">
 
           {/* KPI row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <KPI label="Revenue"         value={fmtUGX(data.totals.revenue)}  icon={<DollarSign size={16} />} />
-            <KPI label="Orders"          value={String(data.totals.orders)}    icon={<ShoppingBag size={16} />} />
-            <KPI label="Avg Order Value" value={fmtUGX(data.totals.avg_order)} icon={<TrendingUp size={16} />} />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <KPI label="Revenue"         value={fmtUGX(data.totals.revenue)}       icon={<DollarSign size={16} />} />
+            <KPI label="Orders"          value={String(data.totals.orders)}        icon={<ShoppingBag size={16} />} />
+            <KPI label="POS Sales"       value={fmtUGX(data.totals.sales_revenue)} icon={<Receipt size={16} />} />
+            <KPI label="Avg Order Value" value={fmtUGX(data.totals.avg_order)}     icon={<TrendingUp size={16} />} />
           </div>
 
           {/* Trend chart — full width */}
