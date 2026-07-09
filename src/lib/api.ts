@@ -169,11 +169,14 @@ export interface SaleItemDetail {
 }
 
 export interface SaleListItem {
-  id:           string;
-  recorded_by:  string | null;
-  total_amount: string;
-  notes:        string;
-  created_at:   string;
+  id:             string;
+  recorded_by:    string | null;
+  customer:       string | null;
+  customer_name:  string;
+  customer_phone: string;
+  total_amount:   string;
+  notes:          string;
+  created_at:     string;
 }
 
 export interface SaleDetail extends SaleListItem {
@@ -187,8 +190,10 @@ export interface SaleItemPayload {
 }
 
 export interface SaleCreatePayload {
-  notes?: string;
-  items:  SaleItemPayload[];
+  notes?:          string;
+  customer_name?:  string;
+  customer_phone?: string;
+  items:           SaleItemPayload[];
 }
 
 export interface SalesSummary {

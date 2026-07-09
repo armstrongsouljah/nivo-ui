@@ -200,7 +200,7 @@ export const serverApi = {
     stats: () =>
       request<Record<string, number>>("/orders/stats/"),
     revenue: () =>
-      request<{ month: string; revenue: number; orders: number }[]>("/orders/revenue/"),
+      request<{ month: string; revenue: number; order_revenue: number; sales_revenue: number; orders: number }[]>("/orders/revenue/"),
     kpi: () =>
       request<{
         revenue:   { value: number; change: number };
@@ -211,7 +211,7 @@ export const serverApi = {
     analytics: (period: number = 30) =>
       request<{
         period_days: number;
-        totals:      { revenue: number; orders: number; avg_order: number };
+        totals:      { revenue: number; order_revenue: number; sales_revenue: number; orders: number; avg_order: number };
         trend:       { date: string; revenue: number; orders: number }[];
         top_products: { label: string; revenue: number; quantity: number }[];
         top_cities:  { city: string; orders: number }[];

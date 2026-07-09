@@ -139,6 +139,8 @@ function RecordSaleForm({
   onCancel: () => void;
 }) {
   const [notes, setNotes] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [rows, setRows] = useState<ItemRowState[]>([newItemRow()]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -170,6 +172,8 @@ function RecordSaleForm({
     try {
       const payload: SaleCreatePayload = {
         notes: notes.trim() || undefined,
+        customer_name: customerName.trim() || undefined,
+        customer_phone: customerPhone.trim() || undefined,
         items: validRows.map((r) => ({
           product_variant: r.variant!.variant,
           quantity: parseInt(r.quantity, 10),
@@ -186,6 +190,8 @@ function RecordSaleForm({
 
       onRecorded(sale, soldQuantities);
       setNotes("");
+      setCustomerName("");
+      setCustomerPhone("");
       setRows([newItemRow()]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to record sale.");
@@ -223,6 +229,23 @@ function RecordSaleForm({
       >
         <Plus size={12} /> Add item
       </button>
+
+      <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+        <input
+          type="text"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+          placeholder="Customer name (optional)"
+          className="flex-1 min-w-40 bg-zinc-800 border border-zinc-700 text-white text-xs px-3 py-2 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+        />
+        <input
+          type="tel"
+          value={customerPhone}
+          onChange={(e) => setCustomerPhone(e.target.value)}
+          placeholder="Customer phone (optional)"
+          className="flex-1 min-w-40 bg-zinc-800 border border-zinc-700 text-white text-xs px-3 py-2 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+        />
+      </div>
 
       <input
         type="text"
@@ -276,6 +299,16 @@ function SaleRow({
       <tr className="border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-800/30 transition-colors">
         <td className="py-3 px-4 pl-5 text-zinc-400 text-xs">{fmtDate(sale.created_at)}</td>
         <td className="py-3 px-4 font-mono text-[11px] text-zinc-500">{sale.id.slice(0, 8)}…</td>
+        <td className="py-3 px-4 text-xs">
+          {sale.customer_name ? (
+            <>
+              <span className="text-zinc-300 font-medium">{sale.customer_name}</span>
+              {sale.customer_phone && <span className="text-zinc-500"> · {sale.customer_phone}</span>}
+            </>
+          ) : (
+            <span className="text-zinc-600">—</span>
+          )}
+        </td>
         <td className="py-3 px-4 font-semibold text-white">{fmtPrice(sale.total_amount)}</td>
         <td className="py-3 px-4 text-zinc-400 text-xs truncate max-w-[220px]">{sale.notes || "—"}</td>
         <td className="py-3 px-4 pr-5 text-right">
@@ -290,7 +323,7 @@ function SaleRow({
       </tr>
       {expanded && (
         <tr className="border-b border-zinc-800/50 bg-zinc-800/20">
-          <td colSpan={5} className="px-5 py-3">
+          <td colSpan={6} className="px-5 py-3">
             {detail ? (
               <div className="space-y-1.5">
                 {detail.items.map((item) => (
@@ -467,10 +500,10 @@ export default function SalesClient({
       ) : (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="w-full min-w-190 text-sm">
               <thead>
                 <tr className="border-b border-zinc-800">
-                  {["Date", "Sale ID", "Total", "Notes", ""].map((h) => (
+                  {["Date", "Sale ID", "Customer", "Total", "Notes", ""].map((h) => (
                     <th key={h} className="text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest py-3 px-4 first:pl-5">
                       {h}
                     </th>
