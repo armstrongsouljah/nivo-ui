@@ -32,10 +32,10 @@ export function parseDjangoError(text: string, status: number): string {
       return String(data.non_field_errors[0]);
     }
 
-    // { "field": ["error msg"] } — first field's first message
-    for (const value of Object.values(data)) {
-      if (Array.isArray(value) && value.length > 0) return String(value[0]);
-      if (typeof value === "string") return value;
+    // { "field": ["error msg"] } — include field name for clarity
+    for (const [key, value] of Object.entries(data)) {
+      if (Array.isArray(value) && value.length > 0) return `${key}: ${String(value[0])}`;
+      if (typeof value === "string") return `${key}: ${value}`;
     }
   } catch {
     // Not JSON — return as-is if it looks like plain text, else generic

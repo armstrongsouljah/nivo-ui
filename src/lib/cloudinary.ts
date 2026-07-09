@@ -18,5 +18,5 @@ export function signUploadParams(params: Record<string, string | number>): strin
     .sort()
     .map((k) => `${k}=${params[k]}`)
     .join("&");
-  return crypto.createHash("sha256").update(toSign + apiSecret).digest("hex");
+  return crypto.createHash("sha1").update(toSign + apiSecret).digest("hex");
 }

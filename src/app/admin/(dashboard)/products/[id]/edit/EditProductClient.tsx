@@ -124,8 +124,16 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
         xhr.open("POST", `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`);
         xhr.upload.onprogress = (e) => { if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100)); };
         xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve((JSON.parse(xhr.responseText) as { secure_url: string }).secure_url);
-          else reject(new Error(`Upload failed: ${xhr.status}`));
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve((JSON.parse(xhr.responseText) as { secure_url: string }).secure_url);
+          } else {
+            try {
+              const err = JSON.parse(xhr.responseText) as { error?: { message?: string } };
+              reject(new Error(err?.error?.message ?? `Upload failed: ${xhr.status}`));
+            } catch {
+              reject(new Error(`Upload failed: ${xhr.status}`));
+            }
+          }
         };
         xhr.onerror = () => reject(new Error("Network error."));
         xhr.send(body);
@@ -241,6 +249,105 @@ function AttributePicker({
   );
 }
 
+// ─── Variant image manager ────────────────────────────────────────────────────
+
+function VariantImageManager({
+  variantId,
+  productId,
+  initial,
+}: {
+  variantId: string;
+  productId: string;
+  initial: GalleryImage[];
+}) {
+  const [images, setImages]   = useState<GalleryImage[]>(initial);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(file: File) {
+    if (!file.type.startsWith("image/")) { setError("Please select an image file."); return; }
+    setError(null);
+    setUploading(true);
+    try {
+      const sig = await getUploadSignature("variants");
+      if (!sig.ok) { setError(sig.error); return; }
+      const body = new FormData();
+      body.append("file", file);
+      body.append("api_key", sig.api_key);
+      body.append("timestamp", String(sig.timestamp));
+      body.append("signature", sig.signature);
+      body.append("folder", sig.folder);
+      const url = await new Promise<string>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`);
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve((JSON.parse(xhr.responseText) as { secure_url: string }).secure_url);
+          } else {
+            try {
+              const err = JSON.parse(xhr.responseText) as { error?: { message?: string } };
+              reject(new Error(err?.error?.message ?? `Upload failed: ${xhr.status}`));
+            } catch {
+              reject(new Error(`Upload failed: ${xhr.status}`));
+            }
+          }
+        };
+        xhr.onerror = () => reject(new Error("Network error."));
+        xhr.send(body);
+      });
+      const saved = await addGalleryImageAction(productId, { url, variant_ids: [variantId], position: images.length });
+      setImages((prev) => [...prev, saved]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  async function handleDelete(imageId: string) {
+    try {
+      await deleteGalleryImageAction(productId, imageId);
+      setImages((prev) => prev.filter((img) => img.id !== imageId));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete image.");
+    }
+  }
+
+  return (
+    <div>
+      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Variant Images</p>
+      <div className="flex flex-wrap gap-2">
+        {images.map((img) => (
+          <div key={img.id} className="relative w-16 h-16 rounded-md overflow-hidden bg-zinc-800 group shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={img.url} alt="" className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={() => handleDelete(img.id)}
+              className="absolute inset-0 bg-black/0 group-hover:bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+            >
+              <Trash2 size={14} className="text-white" />
+            </button>
+          </div>
+        ))}
+        <input ref={inputRef} type="file" accept="image/*" className="sr-only"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="w-16 h-16 rounded-md border-2 border-dashed border-zinc-700 flex items-center justify-center hover:border-zinc-500 transition-colors disabled:opacity-50 shrink-0"
+        >
+          {uploading ? <Loader2 size={14} className="animate-spin text-zinc-500" /> : <Plus size={16} className="text-zinc-500" />}
+        </button>
+      </div>
+      {error && <p className="text-[11px] text-red-400 mt-1 font-semibold">{error}</p>}
+    </div>
+  );
+}
+
 // ─── Variant row (existing) ───────────────────────────────────────────────────
 
 function ExistingVariantRow({
@@ -263,7 +370,7 @@ function ExistingVariantRow({
 
   const [price, setPrice]               = useState(variant.price);
   const [compareAt, setCompareAt]       = useState(variant.compare_at_price ?? "");
-  const [stock, setStock]               = useState(String(variant.stock_quantity));
+  const [stock, setStock]               = useState(String(variant.stock?.quantity ?? 0));
   const [ageGroup, setAgeGroup]         = useState(variant.age_group);
   const [isActive, setIsActive]         = useState(variant.is_active);
   const [attrSelected, setAttrSelected] = useState<Record<string, string>>(
@@ -284,16 +391,17 @@ function ExistingVariantRow({
     setError(null);
     const attribute_value_ids = Object.values(attrSelected).filter(Boolean);
     try {
-      await updateVariantAction(productId, variant.id, {
-        price,
-        compare_at_price: compareAt || undefined,
-        stock_quantity: parseInt(stock) || 0,
-        age_group: ageGroup,
-        is_active: isActive,
-        attribute_value_ids,
-      });
+      const qty = parseInt(stock) || 0;
+      await updateVariantAction(
+        productId, variant.id,
+        { price, compare_at_price: compareAt || undefined, age_group: ageGroup, is_active: isActive, attribute_value_ids },
+        { stockId: variant.stock?.id, quantity: qty },
+      );
       const updatedAttrs = variant.attributes.filter((a) => attrSelected[a.attribute_id] === a.value_id);
-      onUpdated({ ...variant, price, compare_at_price: compareAt || null, stock_quantity: parseInt(stock) || 0, age_group: ageGroup, is_active: isActive, attributes: updatedAttrs });
+      const updatedStock = variant.stock
+        ? { ...variant.stock, quantity: qty }
+        : { id: 0, quantity: qty, low_stock_threshold: 5, is_low_stock: qty <= 5, last_restocked: new Date().toISOString() };
+      onUpdated({ ...variant, price, compare_at_price: compareAt || null, stock: updatedStock, age_group: ageGroup, is_active: isActive, attributes: updatedAttrs });
       setEditing(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save.");
@@ -411,6 +519,12 @@ function ExistingVariantRow({
             />
           )}
 
+          <VariantImageManager
+            variantId={variant.id}
+            productId={productId}
+            initial={variant.images ?? []}
+          />
+
           <label className="flex items-center gap-2.5 cursor-pointer w-fit">
             <button
               type="button"
@@ -476,23 +590,24 @@ function NewVariantForm({
     setError(null);
     const attribute_value_ids = Object.values(attrSelected).filter(Boolean);
     try {
+      const qty = parseInt(stock) || 0;
       await addVariantAction(productId, {
         price,
         compare_at_price: compareAt,
-        stock_quantity: parseInt(stock) || 0,
         age_group: ageGroup,
         attribute_value_ids,
         sku: "",
         is_active: true,
-      });
+      }, qty);
       const optimistic: ProductVariantDetail = {
         id: crypto.randomUUID(),
         sku: "",
         price,
         compare_at_price: compareAt || null,
-        stock_quantity: parseInt(stock) || 0,
+        stock: { id: 0, quantity: qty, low_stock_threshold: 5, is_low_stock: qty <= 5, last_restocked: new Date().toISOString() },
         age_group: ageGroup,
         is_active: true,
+        images: [],
         attributes: attributes.flatMap((attr) => {
           const valueId = attrSelected[attr.id];
           const val = attr.values.find((v) => v.id === valueId);
@@ -608,8 +723,16 @@ function GalleryManager({ productId, initial }: { productId: string; initial: Ga
           xhr.open("POST", `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`);
           xhr.upload.onprogress = (e) => { if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100)); };
           xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) resolve((JSON.parse(xhr.responseText) as { secure_url: string }).secure_url);
-            else reject(new Error(`Upload failed: ${xhr.status}`));
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve((JSON.parse(xhr.responseText) as { secure_url: string }).secure_url);
+            } else {
+              try {
+                const err = JSON.parse(xhr.responseText) as { error?: { message?: string } };
+                reject(new Error(err?.error?.message ?? `Upload failed: ${xhr.status}`));
+              } catch {
+                reject(new Error(`Upload failed: ${xhr.status}`));
+              }
+            }
           };
           xhr.onerror = () => reject(new Error("Network error."));
           xhr.send(body);

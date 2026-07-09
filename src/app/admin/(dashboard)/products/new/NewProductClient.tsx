@@ -156,7 +156,12 @@ function ImageUpload({
             const data = JSON.parse(xhr.responseText) as { secure_url: string };
             resolve(data.secure_url);
           } else {
-            reject(new Error(`Upload failed: ${xhr.status}`));
+            try {
+              const err = JSON.parse(xhr.responseText) as { error?: { message?: string } };
+              reject(new Error(err?.error?.message ?? `Upload failed: ${xhr.status}`));
+            } catch {
+              reject(new Error(`Upload failed: ${xhr.status}`));
+            }
           }
         };
         xhr.onerror = () => reject(new Error("Network error during upload."));
@@ -1064,7 +1069,7 @@ export default function NewProductPage({
       await createProductAction(
         {
           name:            details.name,
-          slug:            details.slug,
+          slug:            details.slug || toSlug(details.name),
           description:     details.description,
           category:        details.category || null,
           cover_image_url: details.cover_image_url,
@@ -1073,12 +1078,12 @@ export default function NewProductPage({
         variants.map((v) => ({
           age_group:           v.age_group,
           attribute_value_ids: v.attribute_value_ids,
-          sku:                 v.sku,
+          sku:                 v.sku || null,
           price:               v.price,
-          compare_at_price:    v.compare_at_price,
-          stock_quantity:       parseInt(v.stock) || 0,
+          compare_at_price:    v.compare_at_price || null,
           is_active:           v.is_active,
         })),
+        variants.map((v) => parseInt(v.stock) || 0),
       );
       setSubmitted(true);
     } catch (e) {

@@ -8,20 +8,22 @@ const CART_ID_KEY    = "nivo_cart_id";
 const CART_ITEMS_KEY = "nivo_cart_items";
 
 export interface LocalCartItem {
-  variant_id: string;
-  quantity:   number;
-  name:       string;
-  label:      string;       // e.g. "6–9 Months / Grey"
-  price:      string;       // decimal string from API
-  image_url:  string | null;
+  variant_id:     string;
+  quantity:       number;
+  stock_quantity: number;
+  name:           string;
+  label:          string;       // e.g. "6–9 Months / Grey"
+  price:          string;       // decimal string from API
+  image_url:      string | null;
 }
 
 export interface AddToCartParams {
-  variantId: string;
-  name:      string;
-  label:     string;
-  price:     string;
-  imageUrl?: string;
+  variantId:     string;
+  name:          string;
+  label:         string;
+  price:         string;
+  stockQuantity: number;
+  imageUrl?:     string;
 }
 
 interface CartContextValue {
@@ -77,7 +79,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             const local = prev.find((i) => i.variant_id === serverItem.product_variant);
             return local
               ? { ...local, quantity: serverItem.quantity }
-              : { variant_id: serverItem.product_variant, quantity: serverItem.quantity, name: "", label: "", price: "0", image_url: null };
+              : { variant_id: serverItem.product_variant, quantity: serverItem.quantity, stock_quantity: serverItem.quantity, name: "", label: "", price: "0", image_url: null };
           });
           persistItems(merged);
           return merged;
@@ -117,14 +119,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }, 400);
   }
 
-  function addToCart({ variantId, name, label, price, imageUrl }: AddToCartParams) {
+  function addToCart({ variantId, name, label, price, stockQuantity, imageUrl }: AddToCartParams) {
     setItems((prev) => {
       const existing = prev.find((i) => i.variant_id === variantId);
       const next: LocalCartItem[] = existing
         ? prev.map((i) =>
-            i.variant_id === variantId ? { ...i, quantity: i.quantity + 1 } : i
+            i.variant_id === variantId
+              ? { ...i, quantity: Math.min(i.quantity + 1, i.stock_quantity) }
+              : i
           )
-        : [...prev, { variant_id: variantId, quantity: 1, name, label, price, image_url: imageUrl ?? null }];
+        : [...prev, { variant_id: variantId, quantity: 1, stock_quantity: stockQuantity, name, label, price, image_url: imageUrl ?? null }];
       persistItems(next);
       scheduleSync(next);
       return next;
@@ -145,7 +149,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (quantity <= 0) { removeFromCart(variantId); return; }
     setItems((prev) => {
       const next = prev.map((i) =>
-        i.variant_id === variantId ? { ...i, quantity } : i
+        i.variant_id === variantId
+          ? { ...i, quantity: Math.min(quantity, i.stock_quantity) }
+          : i
       );
       persistItems(next);
       scheduleSync(next);

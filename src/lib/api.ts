@@ -55,10 +55,9 @@ export interface ProductCreatePayload {
 export interface VariantCreatePayload {
   age_group: string;
   attribute_value_ids: string[];
-  sku: string;
+  sku: string | null;
   price: string;
-  compare_at_price: string;
-  stock_quantity: number;
+  compare_at_price: string | null;
   is_active: boolean;
 }
 
@@ -109,15 +108,95 @@ export interface AttributeDetail {
   values: AttributeValueItem[];
 }
 
+export interface VariantStock {
+  id: number;
+  quantity: number;
+  low_stock_threshold: number;
+  is_low_stock: boolean;
+  last_restocked: string;
+}
+
 export interface ProductVariantDetail {
   id: string;
   sku: string;
   price: string;
   compare_at_price: string | null;
-  stock_quantity: number;
+  stock: VariantStock | null;
   age_group: string;
   is_active: boolean;
   attributes: VariantAttribute[];
+  images: GalleryImage[];
+}
+
+export interface StockEntry {
+  id:                  number;
+  variant:             string;
+  variant_sku:         string;
+  product_name:        string | null;
+  age_group:           string;
+  quantity:            number;
+  low_stock_threshold: number;
+  is_low_stock:        boolean;
+  last_restocked:      string;
+}
+
+export interface StockCreatePayload {
+  variant: string;
+  quantity: number;
+  low_stock_threshold?: number;
+}
+
+export interface StockUpdatePayload {
+  quantity?: number;
+  low_stock_threshold?: number;
+}
+
+export interface StockTransactionCreatePayload {
+  variant: string;
+  change: number;
+  type: 'SALE' | 'RESTOCK' | 'RETURN' | 'ADJUSTMENT';
+  notes?: string;
+}
+
+export interface SaleItemDetail {
+  id:               string;
+  product_variant:  string;
+  variant_sku:      string;
+  quantity:         number;
+  price_at_sale:    string;
+  variant_label:    string;
+  subtotal:         number;
+}
+
+export interface SaleListItem {
+  id:           string;
+  recorded_by:  string | null;
+  total_amount: string;
+  notes:        string;
+  created_at:   string;
+}
+
+export interface SaleDetail extends SaleListItem {
+  items: SaleItemDetail[];
+}
+
+export interface SaleItemPayload {
+  product_variant: string;
+  quantity:         number;
+  price_at_sale?:   string;
+}
+
+export interface SaleCreatePayload {
+  notes?: string;
+  items:  SaleItemPayload[];
+}
+
+export interface SalesSummary {
+  period:        string | null;
+  start_date:    string | null;
+  end_date:      string | null;
+  total_sales:   number;
+  total_revenue: number;
 }
 
 export interface ShippingAddress {
@@ -243,6 +322,8 @@ export interface GalleryImage {
   url: string;
   alt_text: string;
   position: number;
+  is_feature: boolean;
+  variant_ids: string[];
 }
 
 export interface ProductDetail extends Product {
@@ -264,7 +345,6 @@ export interface ProductUpdatePayload {
 export interface VariantUpdatePayload {
   price?: string;
   compare_at_price?: string;
-  stock_quantity?: number;
   age_group?: string;
   is_active?: boolean;
   attribute_value_ids?: string[];

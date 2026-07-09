@@ -84,6 +84,16 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     ...product.gallery.map((g) => g.url),
   ];
 
+  // Jump to the gallery image linked to the selected variant (colour swatch)
+  const activeImageIndex = (() => {
+    if (!selectedOption) return undefined;
+    const coverOffset = product.cover_image_url ? 1 : 0;
+    const idx = product.gallery.findIndex(
+      (g) => g.variant_ids?.includes(selectedOption.variant_id)
+    );
+    return idx === -1 ? undefined : idx + coverOffset;
+  })();
+
   function handleSelectAge(age: string) {
     setSelectedAge((prev) => (prev === age ? null : age));
     setSelectedColorValue(null);
@@ -94,11 +104,12 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     const colorDisplay = colorChoices.find((c) => c.value === selectedColorValue)?.display;
     const labelParts = [selectedGroup?.age_group_display, colorDisplay].filter(Boolean);
     addToCart({
-      variantId: selectedOption.variant_id,
-      name:      product.name,
-      label:     labelParts.join(" / "),
-      price:     selectedOption.price,
-      imageUrl:  product.cover_image_url ?? undefined,
+      variantId:     selectedOption.variant_id,
+      name:          product.name,
+      label:         labelParts.join(" / "),
+      price:         selectedOption.price,
+      stockQuantity: selectedOption.stock_quantity,
+      imageUrl:      product.cover_image_url ?? undefined,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
@@ -126,7 +137,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
         {/* Left — image viewer */}
-        <ProductImageViewer images={images} productName={product.name} />
+        <ProductImageViewer images={images} productName={product.name} jumpTo={activeImageIndex} />
 
         {/* Right — product info */}
         <div className="flex flex-col">
