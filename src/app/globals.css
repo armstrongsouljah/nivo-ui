@@ -19,6 +19,34 @@ html {
   scroll-behavior: smooth;
 }
 
+@keyframes kenBurns {
+  from { transform: scale(1) translate(0, 0); }
+  to   { transform: scale(1.1) translate(-1.5%, -0.8%); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%       { transform: translate(-50%, 9px); }
+}
+
+.hero-bg {
+  animation: kenBurns 18s ease-in-out infinite alternate;
+}
+
+.fade-up-1 { animation: fadeUp 0.65s cubic-bezier(.22,.68,0,1.2) both; animation-delay: 0.05s; }
+.fade-up-2 { animation: fadeUp 0.65s cubic-bezier(.22,.68,0,1.2) both; animation-delay: 0.2s;  }
+.fade-up-3 { animation: fadeUp 0.65s cubic-bezier(.22,.68,0,1.2) both; animation-delay: 0.35s; }
+.fade-up-4 { animation: fadeUp 0.65s cubic-bezier(.22,.68,0,1.2) both; animation-delay: 0.5s;  }
+
+.scroll-cue {
+  animation: scrollBounce 2.2s ease-in-out infinite;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

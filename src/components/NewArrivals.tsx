@@ -5,6 +5,7 @@ import StoreProductCard from "./StoreProductCard";
 export default async function NewArrivals() {
   const products = await serverApi.products
     .list({ page_size: 8, new_arrivals: true })
+    .catch(() => serverApi.products.list({ page_size: 8 }))
     .then((r) => r.results)
     .catch(() => []);
 

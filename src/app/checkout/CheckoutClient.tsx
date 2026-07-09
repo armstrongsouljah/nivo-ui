@@ -71,7 +71,7 @@ export default function CheckoutClient() {
         product_variant:   i.variant_id,
         price_at_purchase: i.price,
         quantity:          i.quantity,
-        variant_label:     i.label,
+        variant_label:     [i.name, i.label].filter(Boolean).join(" — "),
       })),
     });
     if (!result.ok) {

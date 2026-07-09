@@ -19,12 +19,16 @@ import {
   Palette,
   Layers,
   FolderOpen,
+  Boxes,
+  Receipt,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard",    href: "/admin",               icon: LayoutDashboard },
   { label: "Orders",       href: "/admin/orders",        icon: ShoppingBag },
+  { label: "Sales",        href: "/admin/sales",         icon: Receipt },
   { label: "Products",     href: "/admin/products",      icon: Package },
+  { label: "Stock",        href: "/admin/stock",         icon: Boxes },
   { label: "Categories",   href: "/admin/categories",    icon: FolderOpen },
   { label: "Collections",  href: "/admin/collections",   icon: Layers },
   { label: "Attributes",   href: "/admin/attributes",    icon: Palette },

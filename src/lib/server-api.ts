@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { parseDjangoError } from "./parse-api-error";
-import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile } from "./api";
+import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary } from "./api";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
 
@@ -24,6 +24,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
+    console.error(`[server-api] ${init?.method ?? "GET"} ${path} → ${res.status}\n`, text.slice(0, 2000));
     throw new Error(parseDjangoError(text, res.status));
   }
 
@@ -94,7 +95,7 @@ export const serverApi = {
         body: JSON.stringify(payload),
       }),
     createVariant: (productId: string, payload: VariantCreatePayload) =>
-      request<void>("/product-variants/", {
+      request<ProductVariantDetail>("/product-variants/", {
         method: "POST",
         body: JSON.stringify({ product: productId, ...payload }),
       }),
@@ -105,13 +106,58 @@ export const serverApi = {
       }),
     deleteVariant: (productId: string, variantId: string) =>
       request<void>(`/product-variants/${variantId}/?product_pk=${productId}`, { method: "DELETE" }),
-    addGalleryImage: (productId: string, payload: { url: string; alt_text?: string; position?: number }) =>
+    addGalleryImage: (productId: string, payload: { url: string; alt_text?: string; position?: number; is_feature?: boolean; variant_ids?: string[] }) =>
       request<GalleryImage>("/product-gallery/", {
         method: "POST",
         body: JSON.stringify({ product: productId, ...payload }),
       }),
     deleteGalleryImage: (productId: string, imageId: string) =>
       request<void>(`/product-gallery/${imageId}/?product_pk=${productId}`, { method: "DELETE" }),
+  },
+  stock: {
+    list: (variantId?: string) => {
+      const qs = variantId ? `?variant_pk=${variantId}` : "";
+      return request<PaginatedResponse<StockEntry>>(`/stock/${qs}`);
+    },
+    create: (payload: StockCreatePayload) =>
+      request<StockEntry>("/stock/", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    update: (id: number, payload: StockUpdatePayload) =>
+      request<StockEntry>(`/stock/${id}/`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    createTransaction: (payload: StockTransactionCreatePayload) =>
+      request<void>("/stock/transactions/", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+  },
+  sales: {
+    list: (params?: { start_date?: string; end_date?: string; page_size?: number }) => {
+      const qs = new URLSearchParams();
+      qs.set("page_size", String(params?.page_size ?? 100));
+      if (params?.start_date) qs.set("start_date", params.start_date);
+      if (params?.end_date)   qs.set("end_date",   params.end_date);
+      return request<PaginatedResponse<SaleListItem>>(`/sales/?${qs}`);
+    },
+    get: (id: string) =>
+      request<SaleDetail>(`/sales/${id}/`),
+    create: (payload: SaleCreatePayload) =>
+      request<SaleDetail>("/sales/", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    summary: (params?: { period?: "week" | "month"; start_date?: string; end_date?: string }) => {
+      const qs = new URLSearchParams();
+      if (params?.period)     qs.set("period",     params.period);
+      if (params?.start_date) qs.set("start_date", params.start_date);
+      if (params?.end_date)   qs.set("end_date",   params.end_date);
+      const suffix = qs.toString() ? `?${qs}` : "";
+      return request<SalesSummary>(`/sales/summary/${suffix}`);
+    },
   },
   featuredCollections: {
     list: () =>

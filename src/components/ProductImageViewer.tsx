@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const ZOOM = 2.5;
@@ -8,10 +8,17 @@ const ZOOM = 2.5;
 interface Props {
   images: string[];
   productName: string;
+  jumpTo?: number;
 }
 
-export default function ProductImageViewer({ images, productName }: Props) {
+export default function ProductImageViewer({ images, productName, jumpTo }: Props) {
   const [active, setActive]       = useState(0);
+
+  useEffect(() => {
+    if (jumpTo !== undefined && jumpTo >= 0 && jumpTo < images.length) {
+      setActive(jumpTo);
+    }
+  }, [jumpTo, images.length]);
   const [isZooming, setIsZooming] = useState(false);
   const [hoverPos, setHoverPos]   = useState({ x: 50, y: 50 });
   const [modal, setModal]         = useState(false);
