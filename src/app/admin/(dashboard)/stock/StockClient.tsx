@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Search, AlertTriangle, Check, X, Loader2, ArrowUpDown } from "lucide-react";
 import type { StockEntry } from "@/lib/api";
 import { adjustStockAction, updateStockThresholdAction } from "./actions";
@@ -153,8 +153,8 @@ export default function StockClient({ initial }: { initial: StockEntry[] }) {
             </thead>
             <tbody>
               {filtered.map((entry) => (
-                <>
-                  <tr key={entry.id} className="border-b border-zinc-200/70 dark:border-zinc-800/50 last:border-b-0 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 transition-colors">
+                <Fragment key={entry.id}>
+                  <tr className="border-b border-zinc-200/70 dark:border-zinc-800/50 last:border-b-0 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 transition-colors">
                     <td className="py-3 px-4 pl-5 font-semibold text-zinc-900 dark:text-white">{entry.product_name ?? "—"}</td>
                     <td className="py-3 px-4 font-mono text-[11px] text-zinc-600 dark:text-zinc-500">{entry.variant_sku}</td>
                     <td className="py-3 px-4 text-zinc-600 dark:text-zinc-400 text-xs">{entry.age_group}</td>
@@ -198,7 +198,7 @@ export default function StockClient({ initial }: { initial: StockEntry[] }) {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
