@@ -241,5 +241,17 @@ export const serverApi = {
       qs.set("page_size", String(params?.page_size ?? 100));
       return request<PaginatedResponse<UserSummary>>(`/auth/users/?${qs}`);
     },
+    // Follows cursor-pagination's `next` link until exhausted, so directory-wide
+    // views (search, filters, KPI totals) see every account, not just page one.
+    listAll: async (): Promise<UserSummary[]> => {
+      const all: UserSummary[] = [];
+      let path: string | null = `/auth/users/?page_size=100`;
+      while (path) {
+        const res: PaginatedResponse<UserSummary> = await request<PaginatedResponse<UserSummary>>(path);
+        all.push(...res.results);
+        path = res.next ? res.next.replace(BASE_URL, "") : null;
+      }
+      return all;
+    },
   },
 };

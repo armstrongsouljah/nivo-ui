@@ -92,6 +92,7 @@ export default function CustomersClient({ initial }: { initial: UserSummary[] })
 
         <div className="relative">
           <select
+            aria-label="Filter by role"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
             className="appearance-none bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 pl-3 pr-8 py-2.5 rounded-md focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 cursor-pointer"
@@ -105,6 +106,7 @@ export default function CustomersClient({ initial }: { initial: UserSummary[] })
 
         <div className="relative">
           <select
+            aria-label="Filter by status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="appearance-none bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 pl-3 pr-8 py-2.5 rounded-md focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 cursor-pointer"
