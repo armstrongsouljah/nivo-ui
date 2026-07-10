@@ -80,8 +80,8 @@ export default function CustomersPage() {
     <main className="flex-1 px-4 sm:px-6 py-6 overflow-y-auto">
       {/* Header */}
       <div className="mb-7">
-        <h1 className="text-xl font-black text-white uppercase tracking-tight">Customers</h1>
-        <p className="text-xs text-zinc-500 mt-1">
+        <h1 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">Customers</h1>
+        <p className="text-xs text-zinc-600 dark:text-zinc-500 mt-1">
           {mockUsers.length} accounts &mdash; manage users, roles &amp; access
         </p>
       </div>
@@ -89,13 +89,13 @@ export default function CustomersPage() {
       {/* KPI strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Total Accounts", value: mockUsers.length,  color: "text-white" },
-          { label: "Admins",         value: totalAdmins,       color: "text-violet-400" },
-          { label: "Verified",       value: totalVerified,     color: "text-green-400" },
-          { label: "Inactive",       value: totalInactive,     color: "text-zinc-500" },
+          { label: "Total Accounts", value: mockUsers.length,  color: "text-zinc-900 dark:text-white" },
+          { label: "Admins",         value: totalAdmins,       color: "text-violet-600 dark:text-violet-400" },
+          { label: "Verified",       value: totalVerified,     color: "text-green-600 dark:text-green-400" },
+          { label: "Inactive",       value: totalInactive,     color: "text-zinc-600 dark:text-zinc-500" },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4">
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">{label}</p>
+          <div key={label} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-5 py-4">
+            <p className="text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1">{label}</p>
             <p className={`text-2xl font-black ${color}`}>{value}</p>
           </div>
         ))}
@@ -104,13 +104,13 @@ export default function CustomersPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4">
         <div className="relative flex-1 min-w-48">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 dark:text-zinc-500 pointer-events-none" />
           <input
             type="text"
             placeholder="Search by name or email…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 text-white text-xs pl-9 pr-4 py-2.5 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-600"
+            className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs pl-9 pr-4 py-2.5 rounded-md placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600"
           />
         </div>
 
@@ -118,39 +118,39 @@ export default function CustomersPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="appearance-none bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 pl-3 pr-8 py-2.5 rounded-md focus:outline-none focus:border-zinc-600 cursor-pointer"
+            className="appearance-none bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 pl-3 pr-8 py-2.5 rounded-md focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 cursor-pointer"
           >
             {["All", "Admin", "Customer"].map((r) => (
               <option key={r} value={r}>{r === "All" ? "All Roles" : r}</option>
             ))}
           </select>
-          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 dark:text-zinc-500 pointer-events-none" />
         </div>
 
         <div className="relative">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="appearance-none bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 pl-3 pr-8 py-2.5 rounded-md focus:outline-none focus:border-zinc-600 cursor-pointer"
+            className="appearance-none bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 pl-3 pr-8 py-2.5 rounded-md focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 cursor-pointer"
           >
             {["All", "Active", "Inactive", "Unverified"].map((s) => (
               <option key={s} value={s}>{s === "All" ? "All Statuses" : s}</option>
             ))}
           </select>
-          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 dark:text-zinc-500 pointer-events-none" />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[620px] text-sm">
             <thead>
-              <tr className="border-b border-zinc-800">
+              <tr className="border-b border-zinc-200 dark:border-zinc-800">
                 {["Account", "Email", "Role", "Verified", "Status", "Joined", "Actions"].map((h) => (
                   <th
                     key={h}
-                    className="text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-5 py-3"
+                    className="text-left text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest px-5 py-3"
                   >
                     {h}
                   </th>
@@ -160,7 +160,7 @@ export default function CustomersPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-12 text-center text-zinc-600 text-xs">
+                  <td colSpan={7} className="px-5 py-12 text-center text-zinc-500 dark:text-zinc-600 text-xs">
                     No accounts match your filters.
                   </td>
                 </tr>
@@ -170,7 +170,7 @@ export default function CustomersPage() {
                   return (
                     <tr
                       key={user.id}
-                      className={`hover:bg-zinc-800/40 transition-colors ${isLast ? "" : "border-b border-zinc-800/50"}`}
+                      className={`hover:bg-zinc-100/60 dark:hover:bg-zinc-800/40 transition-colors ${isLast ? "" : "border-b border-zinc-200/70 dark:border-zinc-800/50"}`}
                     >
                       {/* Account */}
                       <td className="px-5 py-3.5">
@@ -179,18 +179,18 @@ export default function CustomersPage() {
                             {initials(user)}
                           </div>
                           <div>
-                            <p className="text-xs font-semibold text-white leading-none">
+                            <p className="text-xs font-semibold text-zinc-900 dark:text-white leading-none">
                               {user.first_name} {user.last_name}
                             </p>
                             {user.phone && (
-                              <p className="text-[10px] text-zinc-500 mt-0.5">{user.phone}</p>
+                              <p className="text-[10px] text-zinc-600 dark:text-zinc-500 mt-0.5">{user.phone}</p>
                             )}
                           </div>
                         </div>
                       </td>
 
                       {/* Email */}
-                      <td className="px-5 py-3.5 text-xs text-zinc-400 whitespace-nowrap">
+                      <td className="px-5 py-3.5 text-xs text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
                         {user.email}
                       </td>
 
@@ -198,8 +198,8 @@ export default function CustomersPage() {
                       <td className="px-5 py-3.5">
                         <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
                           user.role === "admin"
-                            ? "bg-violet-500/10 text-violet-400"
-                            : "bg-zinc-500/10 text-zinc-400"
+                            ? "bg-violet-500/10 text-violet-600 dark:text-violet-400"
+                            : "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400"
                         }`}>
                           {user.role}
                         </span>
@@ -208,12 +208,12 @@ export default function CustomersPage() {
                       {/* Verified */}
                       <td className="px-5 py-3.5">
                         {user.is_email_verified ? (
-                          <span className="flex items-center gap-1 text-[10px] font-bold text-green-400">
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-green-600 dark:text-green-400">
                             <ShieldCheck size={12} />
                             Verified
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
+                          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
                             Pending
                           </span>
                         )}
@@ -223,15 +223,15 @@ export default function CustomersPage() {
                       <td className="px-5 py-3.5">
                         <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
                           user.is_active
-                            ? "bg-green-500/10 text-green-400"
-                            : "bg-zinc-500/10 text-zinc-500"
+                            ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                            : "bg-zinc-500/10 text-zinc-600 dark:text-zinc-500"
                         }`}>
                           {user.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
 
                       {/* Joined */}
-                      <td className="px-5 py-3.5 text-xs text-zinc-500 whitespace-nowrap">
+                      <td className="px-5 py-3.5 text-xs text-zinc-600 dark:text-zinc-500 whitespace-nowrap">
                         {formatDate(user.date_joined)}
                       </td>
 
@@ -240,7 +240,7 @@ export default function CustomersPage() {
                         <div className="flex items-center gap-2">
                           <button
                             title="Email user"
-                            className="p-1.5 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-700 transition-colors"
+                            className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                           >
                             <Mail size={13} />
                           </button>
@@ -248,8 +248,8 @@ export default function CustomersPage() {
                             title={user.is_active ? "Deactivate account" : "Activate account"}
                             className={`p-1.5 rounded-md transition-colors ${
                               user.is_active
-                                ? "text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
-                                : "text-zinc-500 hover:text-green-400 hover:bg-green-500/10"
+                                ? "text-zinc-600 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10"
+                                : "text-zinc-600 dark:text-zinc-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-500/10"
                             }`}
                           >
                             <UserX size={13} />
@@ -264,8 +264,8 @@ export default function CustomersPage() {
           </table>
         </div>
 
-        <div className="px-5 py-3 border-t border-zinc-800">
-          <p className="text-[10px] text-zinc-600 uppercase tracking-widest font-bold">
+        <div className="px-5 py-3 border-t border-zinc-200 dark:border-zinc-800">
+          <p className="text-[10px] text-zinc-500 dark:text-zinc-600 uppercase tracking-widest font-bold">
             {filtered.length} of {mockUsers.length} accounts
           </p>
         </div>

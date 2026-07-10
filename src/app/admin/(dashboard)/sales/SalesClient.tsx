@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Check, Loader2, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { Plus, X, Check, Loader2, ChevronDown, ChevronRight, Trash2, Search } from "lucide-react";
 import type { SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, StockEntry } from "@/lib/api";
 import { recordSaleAction, fetchSalesAction, fetchSalesSummaryAction, getSaleDetailAction } from "./actions";
 
@@ -65,10 +65,10 @@ function ItemRow({
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder="Search product or SKU…"
-          className="w-full bg-zinc-800 border border-zinc-700 text-white text-xs px-2.5 py-2 rounded-md focus:outline-none focus:border-zinc-500"
+          className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-2.5 py-2 rounded-md focus:outline-none focus:border-zinc-500"
         />
         {open && suggestions.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full max-h-56 overflow-y-auto bg-zinc-800 border border-zinc-700 rounded-md shadow-lg">
+          <div className="absolute z-10 mt-1 w-full max-h-56 overflow-y-auto bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md shadow-lg">
             {suggestions.map((e) => (
               <button
                 type="button"
@@ -78,14 +78,14 @@ function ItemRow({
                   onChange({ ...row, variant: e, query: `${e.product_name ?? "—"} — ${e.variant_sku}` });
                   setOpen(false);
                 }}
-                className="w-full text-left px-2.5 py-2 text-xs hover:bg-zinc-700 transition-colors flex items-center justify-between gap-2"
+                className="w-full text-left px-2.5 py-2 text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center justify-between gap-2"
               >
-                <span className="text-white font-semibold truncate">
-                  {e.product_name ?? "—"} <span className="text-zinc-500 font-mono">{e.variant_sku}</span>
+                <span className="text-zinc-900 dark:text-white font-semibold truncate">
+                  {e.product_name ?? "—"} <span className="text-zinc-600 dark:text-zinc-500 font-mono">{e.variant_sku}</span>
                 </span>
                 <span
                   className={`shrink-0 text-[10px] font-bold ${
-                    e.quantity === 0 ? "text-red-400" : e.is_low_stock ? "text-amber-400" : "text-zinc-500"
+                    e.quantity === 0 ? "text-red-600 dark:text-red-400" : e.is_low_stock ? "text-amber-600 dark:text-amber-400" : "text-zinc-600 dark:text-zinc-500"
                   }`}
                 >
                   {e.quantity} in stock
@@ -103,7 +103,7 @@ function ItemRow({
         value={row.quantity}
         onChange={(e) => onChange({ ...row, quantity: e.target.value })}
         placeholder="Qty"
-        className="w-20 bg-zinc-800 border border-zinc-700 text-white text-xs px-2.5 py-2 rounded-md focus:outline-none focus:border-zinc-500"
+        className="w-20 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-2.5 py-2 rounded-md focus:outline-none focus:border-zinc-500"
       />
 
       <input
@@ -113,16 +113,16 @@ function ItemRow({
         value={row.price}
         onChange={(e) => onChange({ ...row, price: e.target.value })}
         placeholder="Price (optional)"
-        className="w-32 bg-zinc-800 border border-zinc-700 text-white text-xs px-2.5 py-2 rounded-md focus:outline-none focus:border-zinc-500"
+        className="w-32 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-2.5 py-2 rounded-md focus:outline-none focus:border-zinc-500"
       />
 
       {showRemove && (
-        <button type="button" onClick={onRemove} className="p-2 text-zinc-500 hover:text-red-400 transition-colors">
+        <button type="button" onClick={onRemove} className="p-2 text-zinc-600 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-colors">
           <Trash2 size={14} />
         </button>
       )}
 
-      {overStock && <p className="w-full text-[11px] text-amber-400">Only {row.variant!.quantity} in stock.</p>}
+      {overStock && <p className="w-full text-[11px] text-amber-600 dark:text-amber-400">Only {row.variant!.quantity} in stock.</p>}
     </div>
   );
 }
@@ -201,13 +201,8 @@ function RecordSaleForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Record a Sale</h3>
-        <button type="button" onClick={onCancel} className="text-zinc-500 hover:text-white transition-colors">
-          <X size={15} />
-        </button>
-      </div>
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 space-y-4">
+      <h3 className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest">Record a Sale</h3>
 
       <div className="space-y-2">
         {rows.map((row) => (
@@ -225,7 +220,7 @@ function RecordSaleForm({
       <button
         type="button"
         onClick={() => setRows((prev) => [...prev, newItemRow()])}
-        className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400 hover:text-white transition-colors"
+        className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
       >
         <Plus size={12} /> Add item
       </button>
@@ -236,14 +231,14 @@ function RecordSaleForm({
           value={customerName}
           onChange={(e) => setCustomerName(e.target.value)}
           placeholder="Customer name (optional)"
-          className="flex-1 min-w-40 bg-zinc-800 border border-zinc-700 text-white text-xs px-3 py-2 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+          className="flex-1 min-w-40 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-3 py-2 rounded-md placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
         />
         <input
           type="tel"
           value={customerPhone}
           onChange={(e) => setCustomerPhone(e.target.value)}
           placeholder="Customer phone (optional)"
-          className="flex-1 min-w-40 bg-zinc-800 border border-zinc-700 text-white text-xs px-3 py-2 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+          className="flex-1 min-w-40 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-3 py-2 rounded-md placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
         />
       </div>
 
@@ -252,16 +247,23 @@ function RecordSaleForm({
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         placeholder="Notes (optional)"
-        className="w-full bg-zinc-800 border border-zinc-700 text-white text-xs px-3 py-2 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+        className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-3 py-2 rounded-md placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
       />
 
-      {error && <p className="text-[11px] text-red-400">{error}</p>}
+      {error && <p className="text-[11px] text-red-600 dark:text-red-400">{error}</p>}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold uppercase tracking-widest rounded-md transition-colors"
+        >
+          <X size={13} /> Cancel
+        </button>
         <button
           type="submit"
           disabled={busy}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-500 text-white dark:bg-white dark:text-black text-xs font-bold uppercase tracking-widest rounded-md hover:bg-blue-600 dark:hover:bg-zinc-200 disabled:opacity-40 transition-colors"
         >
           {busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
           Record Sale
@@ -296,25 +298,24 @@ function SaleRow({
 
   return (
     <>
-      <tr className="border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-800/30 transition-colors">
-        <td className="py-3 px-4 pl-5 text-zinc-400 text-xs">{fmtDate(sale.created_at)}</td>
-        <td className="py-3 px-4 font-mono text-[11px] text-zinc-500">{sale.id.slice(0, 8)}…</td>
+      <tr className="border-b border-zinc-200/70 dark:border-zinc-800/50 last:border-b-0 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 transition-colors">
+        <td className="py-3 px-4 pl-5 text-zinc-600 dark:text-zinc-400 text-xs">{fmtDate(sale.created_at)}</td>
         <td className="py-3 px-4 text-xs">
           {sale.customer_name ? (
             <>
-              <span className="text-zinc-300 font-medium">{sale.customer_name}</span>
-              {sale.customer_phone && <span className="text-zinc-500"> · {sale.customer_phone}</span>}
+              <span className="text-zinc-700 dark:text-zinc-300 font-medium">{sale.customer_name}</span>
+              {sale.customer_phone && <span className="text-zinc-600 dark:text-zinc-500"> · {sale.customer_phone}</span>}
             </>
           ) : (
-            <span className="text-zinc-600">—</span>
+            <span className="text-zinc-500 dark:text-zinc-600">—</span>
           )}
         </td>
-        <td className="py-3 px-4 font-semibold text-white">{fmtPrice(sale.total_amount)}</td>
-        <td className="py-3 px-4 text-zinc-400 text-xs truncate max-w-[220px]">{sale.notes || "—"}</td>
+        <td className="py-3 px-4 font-semibold text-zinc-900 dark:text-white">{fmtPrice(sale.total_amount)}</td>
+        <td className="py-3 px-4 text-zinc-600 dark:text-zinc-400 text-xs truncate max-w-[220px]">{sale.notes || "—"}</td>
         <td className="py-3 px-4 pr-5 text-right">
           <button
             onClick={toggle}
-            className="inline-flex items-center gap-1 text-[11px] font-bold text-zinc-500 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
             {loading ? <Loader2 size={12} className="animate-spin" /> : expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
             Items
@@ -322,23 +323,23 @@ function SaleRow({
         </td>
       </tr>
       {expanded && (
-        <tr className="border-b border-zinc-800/50 bg-zinc-800/20">
-          <td colSpan={6} className="px-5 py-3">
+        <tr className="border-b border-zinc-200/70 dark:border-zinc-800/50 bg-zinc-100/40 dark:bg-zinc-800/20">
+          <td colSpan={5} className="px-5 py-3">
             {detail ? (
               <div className="space-y-1.5">
                 {detail.items.map((item) => (
                   <div key={item.id} className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-300">
-                      {item.quantity} × <span className="font-mono text-zinc-500">{item.variant_sku}</span>
+                    <span className="text-zinc-700 dark:text-zinc-300">
+                      {item.quantity} × <span className="font-mono text-zinc-600 dark:text-zinc-500">{item.variant_sku}</span>
                     </span>
-                    <span className="text-zinc-400">
-                      {fmtPrice(item.price_at_sale)} each · <span className="text-white font-semibold">{fmtPrice(item.subtotal)}</span>
+                    <span className="text-zinc-600 dark:text-zinc-400">
+                      {fmtPrice(item.price_at_sale)} each · <span className="text-zinc-900 dark:text-white font-semibold">{fmtPrice(item.subtotal)}</span>
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-zinc-600 italic">Couldn&apos;t load items.</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-600 italic">Couldn&apos;t load items.</p>
             )}
           </td>
         </tr>
@@ -369,6 +370,17 @@ export default function SalesClient({
   const [customEnd, setCustomEnd] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredSales = sales.filter((sale) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      sale.customer_name?.toLowerCase().includes(q) ||
+      sale.customer_phone?.toLowerCase().includes(q) ||
+      sale.notes?.toLowerCase().includes(q)
+    );
+  });
 
   async function applyPreset(p: Preset, start?: string, end?: string) {
     setPreset(p);
@@ -422,17 +434,19 @@ export default function SalesClient({
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.2em] text-zinc-500 uppercase mb-1">Point of Sale</p>
-          <h1 className="text-xl font-black text-white uppercase tracking-tight">Sales</h1>
-          <p className="text-xs text-zinc-500 mt-1">{sales.length} sale{sales.length !== 1 ? "s" : ""} in view</p>
+          <p className="text-[11px] font-bold tracking-[0.2em] text-zinc-600 dark:text-zinc-500 uppercase mb-1">Point of Sale</p>
+          <h1 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">Sales</h1>
+          <p className="text-xs text-zinc-600 dark:text-zinc-500 mt-1">{sales.length} sale{sales.length !== 1 ? "s" : ""} in view</p>
         </div>
-        <button
-          onClick={() => setShowForm((v) => !v)}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-200 transition-colors"
-        >
-          {showForm ? <X size={13} /> : <Plus size={13} />}
-          {showForm ? "Cancel" : "Record Sale"}
-        </button>
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-500 text-white dark:bg-white dark:text-black text-xs font-bold uppercase tracking-widest rounded-md hover:bg-blue-600 dark:hover:bg-zinc-200 transition-colors"
+          >
+            <Plus size={13} />
+            Record Sale
+          </button>
+        )}
       </div>
 
       {/* Record form */}
@@ -444,13 +458,13 @@ export default function SalesClient({
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Total sales</p>
-          <p className="text-2xl font-black text-white">{summary?.total_sales ?? "—"}</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
+          <p className="text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1.5">Total sales</p>
+          <p className="text-2xl font-black text-zinc-900 dark:text-white">{summary?.total_sales ?? "—"}</p>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Revenue</p>
-          <p className="text-2xl font-black text-white">{summary ? fmtPrice(summary.total_revenue) : "—"}</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
+          <p className="text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1.5">Revenue</p>
+          <p className="text-2xl font-black text-zinc-900 dark:text-white">{summary ? fmtPrice(summary.total_revenue) : "—"}</p>
         </div>
       </div>
 
@@ -461,7 +475,7 @@ export default function SalesClient({
             key={p}
             onClick={() => applyPreset(p)}
             className={`px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-colors ${
-              preset === p ? "bg-white text-black" : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
+              preset === p ? "bg-zinc-900 text-white dark:bg-white dark:text-black" : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800"
             }`}
           >
             {p === "week" ? "This week" : p === "month" ? "This month" : "All time"}
@@ -472,46 +486,57 @@ export default function SalesClient({
             type="date"
             value={customStart}
             onChange={(e) => setCustomStart(e.target.value)}
-            className="bg-zinc-900 border border-zinc-800 text-white text-xs px-2.5 py-1.5 rounded-md focus:outline-none focus:border-zinc-500"
+            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs px-2.5 py-1.5 rounded-md focus:outline-none focus:border-zinc-500"
           />
-          <span className="text-zinc-600 text-xs">to</span>
+          <span className="text-zinc-500 dark:text-zinc-600 text-xs">to</span>
           <input
             type="date"
             value={customEnd}
             onChange={(e) => setCustomEnd(e.target.value)}
-            className="bg-zinc-900 border border-zinc-800 text-white text-xs px-2.5 py-1.5 rounded-md focus:outline-none focus:border-zinc-500"
+            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs px-2.5 py-1.5 rounded-md focus:outline-none focus:border-zinc-500"
           />
           <button
             onClick={() => applyPreset("custom", customStart, customEnd)}
             disabled={!customStart && !customEnd}
-            className="px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 disabled:opacity-40 transition-colors"
+            className="px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 disabled:opacity-40 transition-colors"
           >
             Apply
           </button>
         </div>
-        {loading && <Loader2 size={13} className="animate-spin text-zinc-500" />}
+        {loading && <Loader2 size={13} className="animate-spin text-zinc-600 dark:text-zinc-500" />}
+
+        <div className="relative ml-auto">
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-600 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search customer or notes…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs pl-8 pr-3 py-1.5 rounded-md w-52 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+          />
+        </div>
       </div>
 
       {/* Table */}
-      {sales.length === 0 ? (
-        <div className="border border-dashed border-zinc-800 rounded-xl py-16 text-center text-zinc-600 text-sm">
-          No sales recorded for this period.
+      {filteredSales.length === 0 ? (
+        <div className="border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl py-16 text-center text-zinc-500 dark:text-zinc-600 text-sm">
+          {search ? "No sales match your search." : "No sales recorded for this period."}
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-190 text-sm">
               <thead>
-                <tr className="border-b border-zinc-800">
-                  {["Date", "Sale ID", "Customer", "Total", "Notes", ""].map((h) => (
-                    <th key={h} className="text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest py-3 px-4 first:pl-5">
+                <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                  {["Date", "Customer", "Total", "Notes", ""].map((h) => (
+                    <th key={h} className="text-left text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest py-3 px-4 first:pl-5">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {sales.map((sale) => (
+                {filteredSales.map((sale) => (
                   <SaleRow key={sale.id} sale={sale} detail={detailCache[sale.id]} onExpand={() => loadDetail(sale.id)} />
                 ))}
               </tbody>

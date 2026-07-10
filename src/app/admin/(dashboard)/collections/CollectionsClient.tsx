@@ -68,14 +68,14 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
 
   if (state === "done" && value) {
     return (
-      <div className="relative w-full h-44 rounded-lg overflow-hidden bg-zinc-800 group">
+      <div className="relative w-full h-44 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 group">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={value} alt="Cover" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
           <button
             type="button"
             onClick={handleRemove}
-            className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 px-3 py-1.5 bg-red-500/90 text-white text-xs font-bold rounded-md"
+            className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 px-3 py-1.5 bg-red-500/90 text-zinc-900 dark:text-white text-xs font-bold rounded-md"
           >
             <X size={12} /> Remove
           </button>
@@ -86,13 +86,13 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
 
   if (state === "uploading") {
     return (
-      <div className="w-full h-44 rounded-lg border border-zinc-800 bg-zinc-900 flex flex-col items-center justify-center gap-3">
-        <Loader2 size={22} className="text-zinc-500 animate-spin" />
+      <div className="w-full h-44 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-3">
+        <Loader2 size={22} className="text-zinc-600 dark:text-zinc-500 animate-spin" />
         <div className="w-40">
-          <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
-            <div className="h-full bg-white rounded-full transition-all duration-200" style={{ width: `${progress}%` }} />
+          <div className="h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-500 dark:bg-white rounded-full transition-all duration-200" style={{ width: `${progress}%` }} />
           </div>
-          <p className="text-[10px] text-zinc-500 text-center mt-1.5 font-bold tracking-widest">{progress}%</p>
+          <p className="text-[10px] text-zinc-600 dark:text-zinc-500 text-center mt-1.5 font-bold tracking-widest">{progress}%</p>
         </div>
       </div>
     );
@@ -110,20 +110,20 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
         className={`w-full h-44 rounded-lg border-2 border-dashed transition-colors flex flex-col items-center justify-center gap-3 cursor-pointer ${
           state === "error"
             ? "border-red-500/40 bg-red-500/5 hover:border-red-500/60"
-            : "border-zinc-700 bg-zinc-900 hover:border-zinc-500 hover:bg-zinc-800/50"
+            : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-zinc-500 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/50"
         }`}
       >
         {state === "error"
-          ? <ImageOff size={22} className="text-red-400" />
-          : <UploadCloud size={22} className="text-zinc-500" />}
+          ? <ImageOff size={22} className="text-red-600 dark:text-red-400" />
+          : <UploadCloud size={22} className="text-zinc-600 dark:text-zinc-500" />}
         <div className="text-center">
-          <p className="text-xs font-semibold text-zinc-400">
+          <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
             {state === "error" ? "Upload failed — try again" : "Drop an image or click to browse"}
           </p>
-          <p className="text-[10px] text-zinc-600 mt-0.5">PNG, JPG, WEBP</p>
+          <p className="text-[10px] text-zinc-500 dark:text-zinc-600 mt-0.5">PNG, JPG, WEBP</p>
         </div>
       </button>
-      {uploadError && <p className="mt-2 text-[11px] text-red-400 font-semibold">{uploadError}</p>}
+      {uploadError && <p className="mt-2 text-[11px] text-red-600 dark:text-red-400 font-semibold">{uploadError}</p>}
     </div>
   );
 }
@@ -152,19 +152,19 @@ function ProductPicker({
   }
 
   return (
-    <div className="border border-zinc-700 rounded-lg overflow-hidden">
-      <div className="px-3 py-2 border-b border-zinc-700 bg-zinc-950">
+    <div className="border border-zinc-300 dark:border-zinc-700 rounded-lg overflow-hidden">
+      <div className="px-3 py-2 border-b border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search products…"
-          className="w-full bg-transparent text-sm text-white placeholder-zinc-600 focus:outline-none"
+          className="w-full bg-transparent text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none"
         />
       </div>
       <div className="max-h-48 overflow-y-auto">
         {filtered.length === 0 ? (
-          <p className="text-xs text-zinc-600 px-3 py-4 text-center italic">No products found.</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-600 px-3 py-4 text-center italic">No products found.</p>
         ) : (
           filtered.map((p) => {
             const checked = selected.includes(p.id);
@@ -173,30 +173,30 @@ function ProductPicker({
                 key={p.id}
                 type="button"
                 onClick={() => toggle(p.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-zinc-800 transition-colors ${
-                  checked ? "bg-zinc-800/60" : ""
+                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors ${
+                  checked ? "bg-zinc-100 dark:bg-zinc-800/60" : ""
                 }`}
               >
                 <span
                   className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                    checked ? "bg-white border-white" : "border-zinc-600"
+                    checked ? "bg-zinc-900 border-zinc-900 dark:bg-white dark:border-white" : "border-zinc-400 dark:border-zinc-600"
                   }`}
                 >
-                  {checked && <Check size={10} className="text-black" />}
+                  {checked && <Check size={10} className="text-white dark:text-black" />}
                 </span>
                 {p.cover_image_url && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.cover_image_url} alt="" className="w-8 h-8 object-cover rounded shrink-0" />
                 )}
-                <span className="text-sm text-zinc-200 truncate">{p.name}</span>
+                <span className="text-sm text-zinc-800 dark:text-zinc-200 truncate">{p.name}</span>
               </button>
             );
           })
         )}
       </div>
       {selected.length > 0 && (
-        <div className="px-3 py-2 border-t border-zinc-700 bg-zinc-950">
-          <p className="text-[11px] text-zinc-400">{selected.length} product{selected.length !== 1 ? "s" : ""} selected</p>
+        <div className="px-3 py-2 border-t border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950">
+          <p className="text-[11px] text-zinc-600 dark:text-zinc-400">{selected.length} product{selected.length !== 1 ? "s" : ""} selected</p>
         </div>
       )}
     </div>
@@ -252,21 +252,21 @@ function CollectionForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Name */}
       <div>
-        <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
-          Name <span className="text-red-400">*</span>
+        <label className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1.5">
+          Name <span className="text-red-600 dark:text-red-400">*</span>
         </label>
         <input
           type="text"
           value={form.name}
           onChange={(e) => set("name", e.target.value)}
           placeholder="e.g. Summer Essentials"
-          className="w-full bg-zinc-950 border border-zinc-700 text-white text-sm px-3.5 py-2.5 rounded-lg placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-sm px-3.5 py-2.5 rounded-lg placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
         />
       </div>
 
       {/* Description */}
       <div>
-        <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+        <label className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1.5">
           Description
         </label>
         <textarea
@@ -274,13 +274,13 @@ function CollectionForm({
           onChange={(e) => set("description", e.target.value)}
           rows={3}
           placeholder="Short description of this collection…"
-          className="w-full bg-zinc-950 border border-zinc-700 text-white text-sm px-3.5 py-2.5 rounded-lg placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors resize-none"
+          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-sm px-3.5 py-2.5 rounded-lg placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors resize-none"
         />
       </div>
 
       {/* Cover image */}
       <div>
-        <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+        <label className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1.5">
           Cover Image
         </label>
         <ImageUpload
@@ -291,14 +291,14 @@ function CollectionForm({
 
       {/* Active toggle */}
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-zinc-300">Active</span>
+        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Active</span>
         <button
           type="button"
           onClick={() => set("is_active", !form.is_active)}
-          className="text-zinc-400 hover:text-white transition-colors"
+          className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
         >
           {form.is_active ? (
-            <ToggleRight size={26} className="text-white" />
+            <ToggleRight size={26} className="text-zinc-900 dark:text-white" />
           ) : (
             <ToggleLeft size={26} />
           )}
@@ -310,11 +310,11 @@ function CollectionForm({
         <button
           type="button"
           onClick={() => setShowProducts((p) => !p)}
-          className="flex items-center justify-between w-full text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5"
+          className="flex items-center justify-between w-full text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1.5"
         >
           <span>
             Products{" "}
-            <span className="text-zinc-600 normal-case">
+            <span className="text-zinc-500 dark:text-zinc-600 normal-case">
               ({form.products.length} selected)
             </span>
           </span>
@@ -329,13 +329,13 @@ function CollectionForm({
         )}
       </div>
 
-      {error && <p className="text-[11px] text-red-400 font-semibold">{error}</p>}
+      {error && <p className="text-[11px] text-red-600 dark:text-red-400 font-semibold">{error}</p>}
 
       <div className="flex items-center gap-2 pt-1">
         <button
           type="submit"
           disabled={saving || !form.name.trim()}
-          className="flex items-center gap-1.5 px-5 py-2.5 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+          className="flex items-center gap-1.5 px-5 py-2.5 bg-blue-500 text-white dark:bg-white dark:text-black text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-blue-600 dark:hover:bg-zinc-200 disabled:opacity-40 transition-colors"
         >
           {saving ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
           {submitLabel}
@@ -343,9 +343,9 @@ function CollectionForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2.5 text-xs font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors"
         >
-          Cancel
+          <X size={13} /> Cancel
         </button>
       </div>
     </form>
@@ -418,7 +418,7 @@ function CollectionRow({
   };
 
   return (
-    <div className="border border-zinc-800 rounded-xl bg-zinc-900 overflow-hidden">
+    <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header row */}
       <div className="flex items-center gap-4 px-5 py-4">
         {collection.cover_image_url ? (
@@ -426,28 +426,28 @@ function CollectionRow({
           <img
             src={collection.cover_image_url}
             alt={collection.name}
-            className="w-14 h-14 object-cover rounded-lg shrink-0 border border-zinc-700"
+            className="w-14 h-14 object-cover rounded-lg shrink-0 border border-zinc-300 dark:border-zinc-700"
           />
         ) : (
-          <div className="w-14 h-14 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0 border border-zinc-700">
-            <Package size={18} className="text-zinc-600" />
+          <div className="w-14 h-14 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 border border-zinc-300 dark:border-zinc-700">
+            <Package size={18} className="text-zinc-500 dark:text-zinc-600" />
           </div>
         )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-bold text-white truncate">{collection.name}</h3>
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-white truncate">{collection.name}</h3>
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${
                 collection.is_active
-                  ? "bg-emerald-500/15 text-emerald-400"
-                  : "bg-zinc-700 text-zinc-500"
+                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                  : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-500"
               }`}
             >
               {collection.is_active ? "Active" : "Inactive"}
             </span>
           </div>
-          <p className="text-[11px] text-zinc-500 mt-0.5">
+          <p className="text-[11px] text-zinc-600 dark:text-zinc-500 mt-0.5">
             {collection.product_count} product{collection.product_count !== 1 ? "s" : ""}
             {" · "}
             <span className="font-mono">{collection.slug}</span>
@@ -459,7 +459,7 @@ function CollectionRow({
             type="button"
             onClick={startEdit}
             disabled={loadingDetail || deleting}
-            className="p-2 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors disabled:opacity-40"
+            className="p-2 text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors disabled:opacity-40"
             title="Edit"
           >
             {loadingDetail ? <Loader2 size={15} className="animate-spin" /> : <Pencil size={15} />}
@@ -468,7 +468,7 @@ function CollectionRow({
             type="button"
             onClick={handleDelete}
             disabled={deleting || loadingDetail}
-            className="p-2 text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-40"
+            className="p-2 text-zinc-500 dark:text-zinc-600 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-40"
             title="Deactivate"
           >
             {deleting ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
@@ -478,7 +478,7 @@ function CollectionRow({
 
       {/* Edit panel */}
       {editing && (
-        <div className="border-t border-zinc-800 px-5 py-5">
+        <div className="border-t border-zinc-200 dark:border-zinc-800 px-5 py-5">
           <CollectionForm
             initial={initialForm}
             products={products}
@@ -515,8 +515,8 @@ function NewCollectionPanel({
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-      <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
+      <h3 className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-4">
         New Collection
       </h3>
       <CollectionForm
@@ -574,9 +574,9 @@ export default function CollectionsClient({
     <main className="flex-1 px-4 sm:px-6 py-6 overflow-y-auto">
       <div className="flex items-start justify-between mb-8">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.2em] text-zinc-500 uppercase mb-1">Store</p>
-          <h1 className="text-xl font-black text-white uppercase tracking-tight">Featured Collections</h1>
-          <p className="text-xs text-zinc-500 mt-1">
+          <p className="text-[11px] font-bold tracking-[0.2em] text-zinc-600 dark:text-zinc-500 uppercase mb-1">Store</p>
+          <h1 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">Featured Collections</h1>
+          <p className="text-xs text-zinc-600 dark:text-zinc-500 mt-1">
             Curate collections that appear on the homepage and have their own shop page.
           </p>
         </div>
@@ -584,7 +584,7 @@ export default function CollectionsClient({
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-zinc-200 transition-colors shrink-0"
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-500 text-white dark:bg-white dark:text-black text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-blue-600 dark:hover:bg-zinc-200 transition-colors shrink-0"
           >
             <Plus size={13} />
             New Collection
@@ -602,13 +602,13 @@ export default function CollectionsClient({
         )}
 
         {collections.length === 0 && !creating ? (
-          <div className="border border-dashed border-zinc-800 rounded-xl py-16 text-center">
-            <Package size={28} className="text-zinc-700 mx-auto mb-3" />
-            <p className="text-sm text-zinc-600">No collections yet.</p>
+          <div className="border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl py-16 text-center">
+            <Package size={28} className="text-zinc-300 dark:text-zinc-700 mx-auto mb-3" />
+            <p className="text-sm text-zinc-500 dark:text-zinc-600">No collections yet.</p>
             <button
               type="button"
               onClick={() => setCreating(true)}
-              className="mt-3 text-xs font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-colors"
+              className="mt-3 text-xs font-bold text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white uppercase tracking-widest transition-colors"
             >
               Create your first collection
             </button>

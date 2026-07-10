@@ -8,28 +8,28 @@ interface Props {
 
 export default function TopProducts({ products }: Props) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-        <h3 className="text-sm font-bold text-white uppercase tracking-widest">Products</h3>
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 dark:border-zinc-800">
+        <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-widest">Products</h3>
         <Link
           href="/admin/products"
-          className="text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-widest"
+          className="text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors uppercase tracking-widest"
         >
           View All
         </Link>
       </div>
 
       {products.length === 0 ? (
-        <p className="px-5 py-8 text-xs text-zinc-600 text-center">No products yet.</p>
+        <p className="px-5 py-8 text-xs text-zinc-500 dark:text-zinc-600 text-center">No products yet.</p>
       ) : (
-        <ul className="divide-y divide-zinc-800/50">
+        <ul className="divide-y divide-zinc-200 dark:divide-zinc-800/50">
           {products.map((product, i) => (
             <li key={product.id} className="flex items-center gap-4 px-5 py-4">
               {/* Rank */}
-              <span className="text-xs font-black text-zinc-600 w-4 shrink-0">{i + 1}</span>
+              <span className="text-xs font-black text-zinc-500 dark:text-zinc-600 w-4 shrink-0">{i + 1}</span>
 
               {/* Image */}
-              <div className="w-10 h-10 rounded-md bg-zinc-800 shrink-0 overflow-hidden flex items-center justify-center">
+              <div className="w-10 h-10 rounded-md bg-zinc-100 dark:bg-zinc-800 shrink-0 overflow-hidden flex items-center justify-center">
                 {product.cover_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -38,14 +38,14 @@ export default function TopProducts({ products }: Props) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <ImageOff size={13} className="text-zinc-600" />
+                  <ImageOff size={13} className="text-zinc-500 dark:text-zinc-600" />
                 )}
               </div>
 
               {/* Name + category */}
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-white truncate">{product.name}</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">
+                <p className="text-xs font-semibold text-zinc-900 dark:text-white truncate">{product.name}</p>
+                <p className="text-[10px] text-zinc-600 dark:text-zinc-500 mt-0.5">
                   {product.category?.name ?? "Uncategorised"}
                 </p>
               </div>
@@ -53,12 +53,12 @@ export default function TopProducts({ products }: Props) {
               {/* Status badges */}
               <div className="text-right shrink-0 space-y-1">
                 <p className={`text-[10px] font-bold uppercase tracking-wider ${
-                  product.is_active ? "text-green-400" : "text-zinc-600"
+                  product.is_active ? "text-green-600 dark:text-green-400" : "text-zinc-500 dark:text-zinc-600"
                 }`}>
                   {product.is_active ? "Active" : "Inactive"}
                 </p>
                 <p className={`text-[10px] font-semibold ${
-                  product.in_stock ? "text-zinc-500" : "text-amber-400"
+                  product.in_stock ? "text-zinc-600 dark:text-zinc-500" : "text-amber-600 dark:text-amber-400"
                 }`}>
                   {product.in_stock ? "In stock" : "Out of stock"}
                 </p>
