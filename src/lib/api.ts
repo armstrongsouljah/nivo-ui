@@ -21,6 +21,19 @@ export interface AdminProfile {
   date_joined:       string;
 }
 
+export interface UserSummary {
+  id:                string;
+  email:             string;
+  first_name:        string;
+  last_name:         string;
+  full_name:         string;
+  phone:             string;
+  role:              "admin" | "customer";
+  is_active:         boolean;
+  is_email_verified: boolean;
+  date_joined:       string;
+}
+
 export interface Category {
   id: string;
   name: string;

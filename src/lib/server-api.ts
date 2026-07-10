@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { parseDjangoError } from "./parse-api-error";
-import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary } from "./api";
+import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, UserSummary } from "./api";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
 
@@ -234,5 +234,12 @@ export const serverApi = {
         method: "POST",
         body: JSON.stringify(payload),
       }),
+  },
+  users: {
+    list: (params?: { page_size?: number }) => {
+      const qs = new URLSearchParams();
+      qs.set("page_size", String(params?.page_size ?? 100));
+      return request<PaginatedResponse<UserSummary>>(`/auth/users/?${qs}`);
+    },
   },
 };
