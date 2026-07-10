@@ -22,6 +22,7 @@ import {
   Boxes,
   Receipt,
 } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 
 const navItems = [
   { label: "Dashboard",    href: "/admin",               icon: LayoutDashboard },
@@ -53,9 +54,9 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-black border-b border-zinc-800 flex items-center justify-between px-4 h-14">
-        <span className="text-white font-black text-lg tracking-widest uppercase">Nivo Admin</span>
-        <button onClick={() => setOpen(!open)} className="text-zinc-400 hover:text-white">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 h-14">
+        <span className="text-zinc-900 dark:text-white font-black text-lg tracking-widest uppercase">Nivo Admin</span>
+        <button onClick={() => setOpen(!open)} className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
@@ -71,18 +72,18 @@ export default function Sidebar() {
       {/* Sidebar panel */}
       <aside
         className={`
-          fixed top-0 left-0 h-full z-40 w-60 bg-black border-r border-zinc-800
+          fixed top-0 left-0 h-full z-40 w-60 bg-white dark:bg-black border-r border-zinc-200 dark:border-zinc-800
           flex flex-col transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0 md:static md:flex
         `}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-zinc-800 shrink-0">
-          <Link href="/" className="text-white font-black text-xl tracking-widest uppercase">
+        <div className="h-16 flex items-center px-6 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
+          <Link href="/" className="text-zinc-900 dark:text-white font-black text-xl tracking-widest uppercase">
             Nivo
           </Link>
-          <span className="ml-2 text-[9px] font-bold tracking-widest text-zinc-500 uppercase mt-1">
+          <span className="ml-2 text-[9px] font-bold tracking-widest text-zinc-600 dark:text-zinc-500 uppercase mt-1">
             Admin
           </span>
         </div>
@@ -99,8 +100,8 @@ export default function Sidebar() {
                     onClick={() => setOpen(false)}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
                       active
-                        ? "bg-white text-black"
-                        : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                        ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                     }`}
                   >
                     <Icon size={16} />
@@ -113,10 +114,14 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="px-3 pb-5 border-t border-zinc-800 pt-4 shrink-0 space-y-0.5">
+        <div className="px-3 pb-5 border-t border-zinc-200 dark:border-zinc-800 pt-4 shrink-0 space-y-2">
+          <div className="flex items-center justify-between px-3">
+            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">Theme</span>
+            <ThemeToggle />
+          </div>
           <Link
             href="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <Store size={16} />
             Back to Store
@@ -125,7 +130,7 @@ export default function Sidebar() {
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
           >
             <LogOut size={16} />
             {loggingOut ? "Signing out…" : "Sign Out"}

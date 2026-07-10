@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Scopes `dark:` utilities to the nearest ancestor carrying `.dark`
+   (set by the admin theme toggle) instead of `prefers-color-scheme`,
+   so light/dark/system can be three distinct, user-controlled states. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #0a0a0a;

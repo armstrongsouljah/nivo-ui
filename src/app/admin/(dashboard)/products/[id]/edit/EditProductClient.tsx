@@ -39,8 +39,8 @@ const AGE_GROUPS: { value: string; label: string }[] = [
 
 function Label({ htmlFor, children, required }: { htmlFor: string; children: React.ReactNode; required?: boolean }) {
   return (
-    <label htmlFor={htmlFor} className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">
-      {children}{required && <span className="text-red-500 ml-0.5">*</span>}
+    <label htmlFor={htmlFor} className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-1.5">
+      {children}{required && <span className="text-red-600 dark:text-red-500 ml-0.5">*</span>}
     </label>
   );
 }
@@ -50,7 +50,7 @@ function FieldInput({ id, ...props }: React.InputHTMLAttributes<HTMLInputElement
     <input
       id={id}
       {...props}
-      className={`w-full bg-zinc-900 border border-zinc-800 text-white text-sm px-3.5 py-2.5 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors ${props.className ?? ""}`}
+      className={`w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm px-3.5 py-2.5 rounded-md placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors ${props.className ?? ""}`}
     />
   );
 }
@@ -61,16 +61,16 @@ function FieldTextarea({ id, ...props }: React.TextareaHTMLAttributes<HTMLTextAr
       id={id}
       rows={4}
       {...props}
-      className="w-full bg-zinc-900 border border-zinc-800 text-white text-sm px-3.5 py-2.5 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors resize-none"
+      className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm px-3.5 py-2.5 rounded-md placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors resize-none"
     />
   );
 }
 
 function SectionCard({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 sm:p-6">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 sm:p-6">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{title}</h3>
+        <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest">{title}</h3>
         {action}
       </div>
       {children}
@@ -84,7 +84,7 @@ function SaveBtn({ loading, onClick }: { loading: boolean; onClick: () => void }
       type="button"
       onClick={onClick}
       disabled={loading}
-      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-200 disabled:opacity-50 transition-colors"
+      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-500 text-white dark:bg-white dark:text-black text-xs font-bold uppercase tracking-widest rounded-md hover:bg-blue-600 dark:hover:bg-zinc-200 disabled:opacity-50 transition-colors"
     >
       {loading ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
       {loading ? "Saving…" : "Save"}
@@ -94,7 +94,7 @@ function SaveBtn({ loading, onClick }: { loading: boolean; onClick: () => void }
 
 function InlineError({ msg }: { msg: string | null }) {
   if (!msg) return null;
-  return <p className="mt-2 text-[11px] text-red-400 font-semibold">{msg}</p>;
+  return <p className="mt-2 text-[11px] text-red-600 dark:text-red-400 font-semibold">{msg}</p>;
 }
 
 // ─── Image upload (reused from new product page) ──────────────────────────────
@@ -148,13 +148,13 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
 
   if (uploading) {
     return (
-      <div className="w-full h-40 rounded-lg border border-zinc-800 bg-zinc-900 flex flex-col items-center justify-center gap-3">
-        <Loader2 size={20} className="text-zinc-500 animate-spin" />
+      <div className="w-full h-40 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-3">
+        <Loader2 size={20} className="text-zinc-600 dark:text-zinc-500 animate-spin" />
         <div className="w-32">
-          <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
-            <div className="h-full bg-white rounded-full transition-all" style={{ width: `${progress}%` }} />
+          <div className="h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-500 dark:bg-white rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
-          <p className="text-[10px] text-zinc-500 text-center mt-1 font-bold">{progress}%</p>
+          <p className="text-[10px] text-zinc-600 dark:text-zinc-500 text-center mt-1 font-bold">{progress}%</p>
         </div>
       </div>
     );
@@ -162,14 +162,14 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
 
   if (value) {
     return (
-      <div className="relative w-full h-40 rounded-lg overflow-hidden bg-zinc-800 group">
+      <div className="relative w-full h-40 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 group">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={value} alt="Cover" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
           <button
             type="button"
             onClick={() => onChange("")}
-            className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 px-3 py-1.5 bg-red-500/90 text-white text-xs font-bold rounded-md"
+            className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 px-3 py-1.5 bg-red-500/90 text-zinc-900 dark:text-white text-xs font-bold rounded-md"
           >
             <X size={12} /> Remove
           </button>
@@ -186,12 +186,12 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-        className="w-full h-40 rounded-lg border-2 border-dashed border-zinc-700 bg-zinc-900 hover:border-zinc-500 hover:bg-zinc-800/50 transition-colors flex flex-col items-center justify-center gap-3 cursor-pointer"
+        className="w-full h-40 rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-zinc-500 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/50 transition-colors flex flex-col items-center justify-center gap-3 cursor-pointer"
       >
-        <UploadCloud size={20} className="text-zinc-500" />
-        <p className="text-xs font-semibold text-zinc-400">Drop an image or click to browse</p>
+        <UploadCloud size={20} className="text-zinc-600 dark:text-zinc-500" />
+        <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Drop an image or click to browse</p>
       </button>
-      {error && <p className="mt-2 text-[11px] text-red-400 font-semibold">{error}</p>}
+      {error && <p className="mt-2 text-[11px] text-red-600 dark:text-red-400 font-semibold">{error}</p>}
     </div>
   );
 }
@@ -212,7 +212,7 @@ function AttributePicker({
     <div className="space-y-3">
       {attributes.map((attr) => (
         <div key={attr.id}>
-          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+          <p className="text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1.5">
             {attr.name}
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -227,13 +227,13 @@ function AttributePicker({
                   onClick={() => onChange(attr.id, isSelected ? null : val.id)}
                   className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-bold transition-all ${
                     isSelected
-                      ? "border-white text-white bg-zinc-700"
-                      : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+                      ? "border-zinc-900 dark:border-white text-zinc-900 dark:text-white bg-zinc-200 dark:bg-zinc-700"
+                      : "border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                   }`}
                 >
                   {hex && (
                     <span
-                      className="w-3 h-3 rounded-full border border-zinc-600 shrink-0"
+                      className="w-3 h-3 rounded-full border border-zinc-400 dark:border-zinc-600 shrink-0"
                       style={{ backgroundColor: hex }}
                     />
                   )}
@@ -317,10 +317,10 @@ function VariantImageManager({
 
   return (
     <div>
-      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Variant Images</p>
+      <p className="text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-2">Variant Images</p>
       <div className="flex flex-wrap gap-2">
         {images.map((img) => (
-          <div key={img.id} className="relative w-16 h-16 rounded-md overflow-hidden bg-zinc-800 group shrink-0">
+          <div key={img.id} className="relative w-16 h-16 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800 group shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img.url} alt="" className="w-full h-full object-cover" />
             <button
@@ -328,7 +328,7 @@ function VariantImageManager({
               onClick={() => handleDelete(img.id)}
               className="absolute inset-0 bg-black/0 group-hover:bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
             >
-              <Trash2 size={14} className="text-white" />
+              <Trash2 size={14} className="text-zinc-900 dark:text-white" />
             </button>
           </div>
         ))}
@@ -338,12 +338,12 @@ function VariantImageManager({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="w-16 h-16 rounded-md border-2 border-dashed border-zinc-700 flex items-center justify-center hover:border-zinc-500 transition-colors disabled:opacity-50 shrink-0"
+          className="w-16 h-16 rounded-md border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center hover:border-zinc-500 transition-colors disabled:opacity-50 shrink-0"
         >
-          {uploading ? <Loader2 size={14} className="animate-spin text-zinc-500" /> : <Plus size={16} className="text-zinc-500" />}
+          {uploading ? <Loader2 size={14} className="animate-spin text-zinc-600 dark:text-zinc-500" /> : <Plus size={16} className="text-zinc-600 dark:text-zinc-500" />}
         </button>
       </div>
-      {error && <p className="text-[11px] text-red-400 mt-1 font-semibold">{error}</p>}
+      {error && <p className="text-[11px] text-red-600 dark:text-red-400 mt-1 font-semibold">{error}</p>}
     </div>
   );
 }
@@ -423,32 +423,32 @@ function ExistingVariantRow({
   }
 
   return (
-    <div className="border border-zinc-800 rounded-lg bg-zinc-950">
+    <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-950">
       {/* Header row */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
-          <span className="text-[11px] font-bold bg-zinc-700 text-zinc-200 px-2 py-0.5 rounded shrink-0">
+          <span className="text-[11px] font-bold bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 px-2 py-0.5 rounded shrink-0">
             {ageLabel}
           </span>
           {attrBadges && (
             attrBadges.split(" / ").map((b) => (
-              <span key={b} className="text-[11px] font-bold bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded">
+              <span key={b} className="text-[11px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-2 py-0.5 rounded">
                 {b}
               </span>
             ))
           )}
-          <span className={`ml-1 text-[10px] font-bold uppercase tracking-wider ${variant.is_active ? "text-green-400" : "text-zinc-600"}`}>
+          <span className={`ml-1 text-[10px] font-bold uppercase tracking-wider ${variant.is_active ? "text-green-600 dark:text-green-400" : "text-zinc-500 dark:text-zinc-600"}`}>
             {variant.is_active ? "Active" : "Inactive"}
           </span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <span className="text-xs font-semibold text-white mr-2">
+          <span className="text-xs font-semibold text-zinc-900 dark:text-white mr-2">
             UGX {parseFloat(variant.price).toLocaleString("en-UG")}
           </span>
           <button
             type="button"
             onClick={() => { setEditing((e) => !e); setError(null); }}
-            className="p-1.5 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             title="Edit variant"
           >
             <Pencil size={13} />
@@ -457,7 +457,7 @@ function ExistingVariantRow({
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="p-1.5 rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-40 transition-colors"
+            className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 disabled:opacity-40 transition-colors"
             title="Delete variant"
           >
             {deleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
@@ -467,39 +467,39 @@ function ExistingVariantRow({
 
       {/* Expanded edit form */}
       {editing && (
-        <div className="border-t border-zinc-800 px-4 py-4 space-y-3">
+        <div className="border-t border-zinc-200 dark:border-zinc-800 px-4 py-4 space-y-3">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
-              <label htmlFor={priceId} className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
-                Price (UGX)<span className="text-red-500 ml-0.5">*</span>
+              <label htmlFor={priceId} className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1">
+                Price (UGX)<span className="text-red-600 dark:text-red-500 ml-0.5">*</span>
               </label>
               <input id={priceId} type="number" min="0" step="100" value={price} onChange={(e) => setPrice(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
+                className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
             </div>
             <div>
-              <label htmlFor={compareId} className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
+              <label htmlFor={compareId} className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1">
                 Compare At
               </label>
               <input id={compareId} type="number" min="0" step="100" value={compareAt} onChange={(e) => setCompareAt(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
+                className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
             </div>
             <div>
-              <label htmlFor={stockId} className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
-                Stock<span className="text-red-500 ml-0.5">*</span>
+              <label htmlFor={stockId} className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1">
+                Stock<span className="text-red-600 dark:text-red-500 ml-0.5">*</span>
               </label>
               <input id={stockId} type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
+                className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
             </div>
             <div>
-              <label htmlFor={ageId} className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
+              <label htmlFor={ageId} className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1">
                 Age Group
               </label>
               <div className="relative">
                 <select id={ageId} value={ageGroup} onChange={(e) => setAgeGroup(e.target.value)}
-                  className="w-full appearance-none bg-zinc-900 border border-zinc-800 text-white text-sm pl-3 pr-8 py-2 rounded-md focus:outline-none focus:border-zinc-500 cursor-pointer">
+                  className="w-full appearance-none bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm pl-3 pr-8 py-2 rounded-md focus:outline-none focus:border-zinc-500 cursor-pointer">
                   {AGE_GROUPS.map((ag) => <option key={ag.value} value={ag.value}>{ag.label}</option>)}
                 </select>
-                <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 dark:text-zinc-500 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -531,23 +531,23 @@ function ExistingVariantRow({
               role="switch"
               aria-checked={isActive}
               onClick={() => setIsActive((v) => !v)}
-              className={`relative w-9 h-5 rounded-full transition-colors ${isActive ? "bg-white" : "bg-zinc-700"}`}
+              className={`relative w-9 h-5 rounded-full transition-colors ${isActive ? "bg-blue-500 dark:bg-white" : "bg-zinc-200 dark:bg-zinc-700"}`}
             >
-              <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform ${isActive ? "translate-x-4 bg-black" : "translate-x-0 bg-zinc-400"}`} />
+              <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform ${isActive ? "translate-x-4 bg-white dark:bg-black" : "translate-x-0 bg-zinc-400"}`} />
             </button>
-            <span className="text-xs font-medium text-zinc-300">{isActive ? "Active" : "Inactive"}</span>
+            <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{isActive ? "Active" : "Inactive"}</span>
           </label>
 
           <InlineError msg={error} />
 
           <div className="flex gap-2 pt-1">
             <button type="button" onClick={handleSave} disabled={saving}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-black text-xs font-bold rounded-md hover:bg-zinc-200 disabled:opacity-50 transition-colors">
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 text-white dark:bg-white dark:text-black text-xs font-bold rounded-md hover:bg-blue-600 dark:hover:bg-zinc-200 disabled:opacity-50 transition-colors">
               {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
               {saving ? "Saving…" : "Save Changes"}
             </button>
             <button type="button" onClick={() => { setEditing(false); setError(null); }}
-              className="px-3 py-1.5 bg-zinc-800 text-zinc-400 text-xs font-bold rounded-md hover:bg-zinc-700 transition-colors">
+              className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-bold rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
               Cancel
             </button>
           </div>
@@ -623,41 +623,41 @@ function NewVariantForm({
   }
 
   return (
-    <div className="border border-zinc-700 rounded-lg bg-zinc-950 px-4 py-4 space-y-3">
-      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">New Variant</p>
+    <div className="border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-950 px-4 py-4 space-y-3">
+      <p className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest">New Variant</p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <label htmlFor={priceId} className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
-            Price (UGX)<span className="text-red-500 ml-0.5">*</span>
+          <label htmlFor={priceId} className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1">
+            Price (UGX)<span className="text-red-600 dark:text-red-500 ml-0.5">*</span>
           </label>
           <input id={priceId} type="number" min="0" step="100" placeholder="0" value={price} onChange={(e) => setPrice(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
+            className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
         </div>
         <div>
-          <label htmlFor={compareId} className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
+          <label htmlFor={compareId} className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1">
             Compare At
           </label>
           <input id={compareId} type="number" min="0" step="100" placeholder="—" value={compareAt} onChange={(e) => setCompareAt(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
+            className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
         </div>
         <div>
-          <label htmlFor={stockId} className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
-            Stock<span className="text-red-500 ml-0.5">*</span>
+          <label htmlFor={stockId} className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1">
+            Stock<span className="text-red-600 dark:text-red-500 ml-0.5">*</span>
           </label>
           <input id={stockId} type="number" min="0" placeholder="0" value={stock} onChange={(e) => setStock(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
+            className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm px-3 py-2 rounded-md focus:outline-none focus:border-zinc-500" />
         </div>
         <div>
-          <label htmlFor={ageId} className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
-            Age Group<span className="text-red-500 ml-0.5">*</span>
+          <label htmlFor={ageId} className="block text-[10px] font-bold text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-1">
+            Age Group<span className="text-red-600 dark:text-red-500 ml-0.5">*</span>
           </label>
           <div className="relative">
             <select id={ageId} value={ageGroup} onChange={(e) => setAgeGroup(e.target.value)}
-              className="w-full appearance-none bg-zinc-900 border border-zinc-800 text-white text-sm pl-3 pr-8 py-2 rounded-md focus:outline-none focus:border-zinc-500 cursor-pointer">
+              className="w-full appearance-none bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm pl-3 pr-8 py-2 rounded-md focus:outline-none focus:border-zinc-500 cursor-pointer">
               <option value="">Select…</option>
               {AGE_GROUPS.map((ag) => <option key={ag.value} value={ag.value}>{ag.label}</option>)}
             </select>
-            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 dark:text-zinc-500 pointer-events-none" />
           </div>
         </div>
       </div>
@@ -681,13 +681,13 @@ function NewVariantForm({
 
       <div className="flex gap-2 pt-1">
         <button type="button" onClick={handleAdd} disabled={saving}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-black text-xs font-bold rounded-md hover:bg-zinc-200 disabled:opacity-50 transition-colors">
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 text-white dark:bg-white dark:text-black text-xs font-bold rounded-md hover:bg-blue-600 dark:hover:bg-zinc-200 disabled:opacity-50 transition-colors">
           {saving ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
           {saving ? "Adding…" : "Add Variant"}
         </button>
         <button type="button" onClick={onCancel}
-          className="px-3 py-1.5 bg-zinc-800 text-zinc-400 text-xs font-bold rounded-md hover:bg-zinc-700 transition-colors">
-          Cancel
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-md transition-colors">
+          <X size={12} /> Cancel
         </button>
       </div>
     </div>
@@ -763,14 +763,14 @@ function GalleryManager({ productId, initial }: { productId: string; initial: Ga
       {images.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {images.map((img) => (
-            <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden bg-zinc-800 group">
+            <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img.url} alt={img.alt_text || ""} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center">
                 <button
                   type="button"
                   onClick={() => handleDelete(img.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-500/90 text-white rounded-md"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-500/90 text-zinc-900 dark:text-white rounded-md"
                   title="Remove image"
                 >
                   <Trash2 size={13} />
@@ -781,15 +781,15 @@ function GalleryManager({ productId, initial }: { productId: string; initial: Ga
 
           {/* Upload slot */}
           {uploading ? (
-            <div className="aspect-square rounded-lg border border-zinc-700 bg-zinc-900 flex flex-col items-center justify-center gap-2">
-              <Loader2 size={18} className="text-zinc-500 animate-spin" />
-              <p className="text-[10px] font-bold text-zinc-600">{progress}%</p>
+            <div className="aspect-square rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-2">
+              <Loader2 size={18} className="text-zinc-600 dark:text-zinc-500 animate-spin" />
+              <p className="text-[10px] font-bold text-zinc-500 dark:text-zinc-600">{progress}%</p>
             </div>
           ) : (
             <button type="button" onClick={() => inputRef.current?.click()}
-              className="aspect-square rounded-lg border-2 border-dashed border-zinc-700 bg-zinc-900 hover:border-zinc-500 hover:bg-zinc-800/50 transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer">
-              <Plus size={18} className="text-zinc-500" />
-              <span className="text-[10px] text-zinc-600 font-bold">Add</span>
+              className="aspect-square rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-zinc-500 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/50 transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer">
+              <Plus size={18} className="text-zinc-600 dark:text-zinc-500" />
+              <span className="text-[10px] text-zinc-500 dark:text-zinc-600 font-bold">Add</span>
             </button>
           )}
         </div>
@@ -798,18 +798,18 @@ function GalleryManager({ productId, initial }: { productId: string; initial: Ga
       {/* Empty state dropzone */}
       {images.length === 0 && (
         uploading ? (
-          <div className="w-full h-32 rounded-lg border border-zinc-800 bg-zinc-900 flex flex-col items-center justify-center gap-2">
-            <Loader2 size={20} className="text-zinc-500 animate-spin" />
-            <p className="text-[10px] font-bold text-zinc-600">{progress}%</p>
+          <div className="w-full h-32 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-2">
+            <Loader2 size={20} className="text-zinc-600 dark:text-zinc-500 animate-spin" />
+            <p className="text-[10px] font-bold text-zinc-500 dark:text-zinc-600">{progress}%</p>
           </div>
         ) : (
           <button type="button" onClick={() => inputRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); }}
-            className="w-full h-32 rounded-lg border-2 border-dashed border-zinc-700 bg-zinc-900 hover:border-zinc-500 hover:bg-zinc-800/50 transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer">
-            <UploadCloud size={20} className="text-zinc-500" />
-            <p className="text-xs font-semibold text-zinc-400">Drop images or click to browse</p>
-            <p className="text-[10px] text-zinc-600">PNG, JPG, WEBP — multiple allowed</p>
+            className="w-full h-32 rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-zinc-500 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/50 transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer">
+            <UploadCloud size={20} className="text-zinc-600 dark:text-zinc-500" />
+            <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Drop images or click to browse</p>
+            <p className="text-[10px] text-zinc-500 dark:text-zinc-600">PNG, JPG, WEBP — multiple allowed</p>
           </button>
         )
       )}
@@ -822,7 +822,7 @@ function GalleryManager({ productId, initial }: { productId: string; initial: Ga
         className="sr-only"
         onChange={(e) => { if (e.target.files?.length) handleFiles(e.target.files); }}
       />
-      {error && <p className="text-[11px] text-red-400 font-semibold">{error}</p>}
+      {error && <p className="text-[11px] text-red-600 dark:text-red-400 font-semibold">{error}</p>}
     </div>
   );
 }
@@ -923,16 +923,16 @@ export default function EditProductClient({
       <div className="mb-8">
         <Link
           href="/admin/products"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-colors mb-4"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white uppercase tracking-widest transition-colors mb-4"
         >
           <ArrowLeft size={13} /> Products
         </Link>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-tight">{product.name}</h1>
-            <p className="text-xs text-zinc-500 mt-1 font-mono">/products/{product.slug}</p>
+            <h1 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">{product.name}</h1>
+            <p className="text-xs text-zinc-600 dark:text-zinc-500 mt-1 font-mono">/products/{product.slug}</p>
           </div>
-          <span className={`shrink-0 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${product.is_active ? "bg-green-500/10 text-green-400" : "bg-zinc-500/10 text-zinc-500"}`}>
+          <span className={`shrink-0 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${product.is_active ? "bg-green-500/10 text-green-600 dark:text-green-400" : "bg-zinc-500/10 text-zinc-600 dark:text-zinc-500"}`}>
             {product.is_active ? "Active" : "Inactive"}
           </span>
         </div>
@@ -944,7 +944,7 @@ export default function EditProductClient({
           title="Product Details"
           action={
             <div className="flex items-center gap-2">
-              {detailsSaved && <span className="text-[10px] font-bold text-green-400 uppercase tracking-widest">Saved</span>}
+              {detailsSaved && <span className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Saved</span>}
               <SaveBtn loading={detailsSaving} onClick={handleSaveDetails} />
             </div>
           }
@@ -957,7 +957,7 @@ export default function EditProductClient({
             <div>
               <Label htmlFor={slugId}>URL Slug</Label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-zinc-600 select-none pointer-events-none">/products/</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-zinc-500 dark:text-zinc-600 select-none pointer-events-none">/products/</span>
                 <FieldInput id={slugId} className="pl-22" value={slug} onChange={(e) => setSlug(e.target.value)} />
               </div>
             </div>
@@ -969,15 +969,15 @@ export default function EditProductClient({
               <Label htmlFor={catId}>Category</Label>
               <div className="relative">
                 <select id={catId} value={category} onChange={(e) => setCategory(e.target.value)}
-                  className="w-full appearance-none bg-zinc-900 border border-zinc-800 text-white text-sm pl-3.5 pr-9 py-2.5 rounded-md focus:outline-none focus:border-zinc-500 transition-colors cursor-pointer">
+                  className="w-full appearance-none bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-sm pl-3.5 pr-9 py-2.5 rounded-md focus:outline-none focus:border-zinc-500 transition-colors cursor-pointer">
                   <option value="">No category</option>
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 dark:text-zinc-500 pointer-events-none" />
               </div>
               {!showNewCat ? (
                 <button type="button" onClick={() => setShowNewCat(true)}
-                  className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">
+                  className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white uppercase tracking-widest transition-colors">
                   <Plus size={12} /> New category
                 </button>
               ) : (
@@ -985,18 +985,18 @@ export default function EditProductClient({
                   <input id={newCatId} type="text" autoFocus placeholder="Category name" value={newCatName}
                     onChange={(e) => setNewCatName(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleCreateCategory(); if (e.key === "Escape") { setShowNewCat(false); setNewCatName(""); } }}
-                    className="flex-1 bg-zinc-950 border border-zinc-700 text-white text-sm px-3 py-2 rounded-md placeholder-zinc-600 focus:outline-none focus:border-zinc-500" />
+                    className="flex-1 bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-sm px-3 py-2 rounded-md placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500" />
                   <button type="button" onClick={handleCreateCategory} disabled={creatingCat || !newCatName.trim()}
-                    className="px-3 py-2 bg-white text-black text-xs font-bold rounded-md hover:bg-zinc-200 disabled:opacity-40 transition-colors">
+                    className="px-3 py-2 bg-blue-500 text-white dark:bg-white dark:text-black text-xs font-bold rounded-md hover:bg-blue-600 dark:hover:bg-zinc-200 disabled:opacity-40 transition-colors">
                     {creatingCat ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
                   </button>
                   <button type="button" onClick={() => { setShowNewCat(false); setNewCatName(""); setCatError(null); }}
-                    className="p-2 text-zinc-500 hover:text-white transition-colors">
+                    className="p-2 text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
                     <X size={13} />
                   </button>
                 </div>
               )}
-              {catError && <p className="mt-1 text-[11px] text-red-400 font-semibold">{catError}</p>}
+              {catError && <p className="mt-1 text-[11px] text-red-600 dark:text-red-400 font-semibold">{catError}</p>}
             </div>
             <div>
               <Label htmlFor="cover">Cover Image</Label>
@@ -1004,10 +1004,10 @@ export default function EditProductClient({
             </div>
             <label className="flex items-center gap-3 cursor-pointer w-fit">
               <button type="button" role="switch" aria-checked={isActive} onClick={() => setIsActive((v) => !v)}
-                className={`relative w-10 h-5 rounded-full transition-colors ${isActive ? "bg-white" : "bg-zinc-700"}`}>
-                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform ${isActive ? "translate-x-5 bg-black" : "translate-x-0 bg-zinc-400"}`} />
+                className={`relative w-10 h-5 rounded-full transition-colors ${isActive ? "bg-blue-500 dark:bg-white" : "bg-zinc-200 dark:bg-zinc-700"}`}>
+                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform ${isActive ? "translate-x-5 bg-white dark:bg-black" : "translate-x-0 bg-zinc-400"}`} />
               </button>
-              <span className="text-sm font-medium text-zinc-300">
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {isActive ? "Active — visible in store" : "Inactive — hidden from store"}
               </span>
             </label>
@@ -1021,7 +1021,7 @@ export default function EditProductClient({
           action={
             !addingVariant && (
               <button type="button" onClick={() => setAddingVariant(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-700 transition-colors">
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
                 <Plus size={12} /> Add Variant
               </button>
             )
@@ -1029,7 +1029,7 @@ export default function EditProductClient({
         >
           <div className="space-y-2">
             {variants.length === 0 && !addingVariant && (
-              <p className="text-xs text-zinc-600 italic text-center py-6 border border-dashed border-zinc-800 rounded-lg">
+              <p className="text-xs text-zinc-500 dark:text-zinc-600 italic text-center py-6 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg">
                 No variants yet. Add one to make this product purchasable.
               </p>
             )}

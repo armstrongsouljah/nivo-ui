@@ -25,8 +25,8 @@ export default async function AdminDashboard() {
   return (
     <main className="flex-1 px-4 sm:px-6 py-6 overflow-y-auto">
       <div className="mb-7">
-        <h1 className="text-xl font-black text-white uppercase tracking-tight">Dashboard</h1>
-        <p className="text-xs text-zinc-500 mt-1">All figures in UGX · this month</p>
+        <h1 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">Dashboard</h1>
+        <p className="text-xs text-zinc-600 dark:text-zinc-500 mt-1">All figures in UGX · this month</p>
       </div>
 
       {/* KPI cards */}

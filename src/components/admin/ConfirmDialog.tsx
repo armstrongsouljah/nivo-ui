@@ -41,15 +41,15 @@ function Dialog({ state, onClose }: { state: DialogState; onClose: (value: boole
   const variant = state.variant ?? "danger";
 
   const iconColors = {
-    danger:  "bg-red-500/10 text-red-400",
-    warning: "bg-amber-500/10 text-amber-400",
-    info:    "bg-blue-500/10 text-blue-400",
+    danger:  "bg-red-500/10 text-red-600 dark:text-red-400",
+    warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    info:    "bg-blue-500/10 text-blue-600 dark:text-blue-400",
   };
 
   const confirmColors = {
     danger:  "bg-red-500 hover:bg-red-600 text-white",
     warning: "bg-amber-500 hover:bg-amber-600 text-black",
-    info:    "bg-white hover:bg-zinc-200 text-black",
+    info:    "bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-black",
   };
 
   const Icon = variant === "info" ? Info : AlertTriangle;
@@ -70,7 +70,7 @@ function Dialog({ state, onClose }: { state: DialogState; onClose: (value: boole
         aria-describedby={state.message ? "confirm-message" : undefined}
         className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm mx-auto"
       >
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-6 mx-4">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-6 mx-4">
           {/* Icon + title */}
           <div className="flex items-start gap-4 mb-4">
             <span className={`p-2.5 rounded-xl shrink-0 ${iconColors[variant]}`}>
@@ -79,12 +79,12 @@ function Dialog({ state, onClose }: { state: DialogState; onClose: (value: boole
             <div className="pt-0.5">
               <h2
                 id="confirm-title"
-                className="text-sm font-black text-white uppercase tracking-wide leading-snug"
+                className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wide leading-snug"
               >
                 {state.title}
               </h2>
               {state.message && (
-                <p id="confirm-message" className="text-xs text-zinc-400 mt-1.5 leading-relaxed">
+                <p id="confirm-message" className="text-xs text-zinc-600 dark:text-zinc-400 mt-1.5 leading-relaxed">
                   {state.message}
                 </p>
               )}
@@ -97,7 +97,7 @@ function Dialog({ state, onClose }: { state: DialogState; onClose: (value: boole
               ref={cancelRef}
               type="button"
               onClick={() => onClose(false)}
-              className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors uppercase tracking-widest"
+              className="px-4 py-2 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors uppercase tracking-widest"
             >
               {state.cancelLabel ?? "Cancel"}
             </button>
