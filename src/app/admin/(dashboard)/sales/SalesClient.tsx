@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Check, Loader2, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { Plus, X, Check, Loader2, ChevronDown, ChevronRight, Trash2, Search } from "lucide-react";
 import type { SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, StockEntry } from "@/lib/api";
 import { recordSaleAction, fetchSalesAction, fetchSalesSummaryAction, getSaleDetailAction } from "./actions";
 
@@ -370,6 +370,17 @@ export default function SalesClient({
   const [customEnd, setCustomEnd] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredSales = sales.filter((sale) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      sale.customer_name?.toLowerCase().includes(q) ||
+      sale.customer_phone?.toLowerCase().includes(q) ||
+      sale.notes?.toLowerCase().includes(q)
+    );
+  });
 
   async function applyPreset(p: Preset, start?: string, end?: string) {
     setPreset(p);
@@ -493,12 +504,23 @@ export default function SalesClient({
           </button>
         </div>
         {loading && <Loader2 size={13} className="animate-spin text-zinc-600 dark:text-zinc-500" />}
+
+        <div className="relative ml-auto">
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-600 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search customer or notes…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs pl-8 pr-3 py-1.5 rounded-md w-52 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+          />
+        </div>
       </div>
 
       {/* Table */}
-      {sales.length === 0 ? (
+      {filteredSales.length === 0 ? (
         <div className="border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl py-16 text-center text-zinc-500 dark:text-zinc-600 text-sm">
-          No sales recorded for this period.
+          {search ? "No sales match your search." : "No sales recorded for this period."}
         </div>
       ) : (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
@@ -514,7 +536,7 @@ export default function SalesClient({
                 </tr>
               </thead>
               <tbody>
-                {sales.map((sale) => (
+                {filteredSales.map((sale) => (
                   <SaleRow key={sale.id} sale={sale} detail={detailCache[sale.id]} onExpand={() => loadDetail(sale.id)} />
                 ))}
               </tbody>
