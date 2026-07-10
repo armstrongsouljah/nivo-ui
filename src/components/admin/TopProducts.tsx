@@ -22,7 +22,7 @@ export default function TopProducts({ products }: Props) {
       {products.length === 0 ? (
         <p className="px-5 py-8 text-xs text-zinc-500 dark:text-zinc-600 text-center">No products yet.</p>
       ) : (
-        <ul className="divide-y divide-zinc-800/50">
+        <ul className="divide-y divide-zinc-200 dark:divide-zinc-800/50">
           {products.map((product, i) => (
             <li key={product.id} className="flex items-center gap-4 px-5 py-4">
               {/* Rank */}

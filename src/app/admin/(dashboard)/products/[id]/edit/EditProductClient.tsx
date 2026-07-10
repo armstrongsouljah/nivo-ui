@@ -169,7 +169,7 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
           <button
             type="button"
             onClick={() => onChange("")}
-            className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 px-3 py-1.5 bg-red-500/90 text-zinc-900 dark:text-white text-xs font-bold rounded-md"
+            className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 px-3 py-1.5 bg-red-500/90 text-white text-xs font-bold rounded-md"
           >
             <X size={12} /> Remove
           </button>
@@ -770,7 +770,7 @@ function GalleryManager({ productId, initial }: { productId: string; initial: Ga
                 <button
                   type="button"
                   onClick={() => handleDelete(img.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-500/90 text-zinc-900 dark:text-white rounded-md"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-500/90 text-white rounded-md"
                   title="Remove image"
                 >
                   <Trash2 size={13} />

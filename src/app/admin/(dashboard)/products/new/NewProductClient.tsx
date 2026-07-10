@@ -205,7 +205,7 @@ function ImageUpload({
           <button
             type="button"
             onClick={handleRemove}
-            className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 px-3 py-1.5 bg-red-500/90 text-zinc-900 dark:text-white text-xs font-bold rounded-md"
+            className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 px-3 py-1.5 bg-red-500/90 text-white text-xs font-bold rounded-md"
           >
             <X size={12} />
             Remove
@@ -289,7 +289,7 @@ function StepIndicator({ current }: { current: number }) {
             <div className="flex flex-col items-center gap-1.5">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black transition-colors
                 ${done   ? "bg-zinc-900 text-white dark:bg-white dark:text-black"
-                : active ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white ring-2 ring-white ring-offset-2 ring-offset-zinc-950"
+                : active ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white ring-2 ring-zinc-900 dark:ring-white ring-offset-2 ring-offset-zinc-50 dark:ring-offset-zinc-950"
                          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-600"}`}>
                 {done ? <Check size={13} strokeWidth={3} /> : i + 1}
               </div>
@@ -591,7 +591,7 @@ function VariantRowEditor({ row, onChange, onRemove, index, attributes }: {
         <button
           type="button"
           onClick={onRemove}
-          className="p-1 text-zinc-300 dark:text-zinc-700 hover:text-red-600 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+          className="p-1 text-zinc-400 dark:text-zinc-600 hover:text-red-600 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
           title="Remove variant"
         >
           <Trash2 size={14} />
@@ -983,7 +983,7 @@ function StepReview({ details, variants, attributes }: { details: ProductDetails
                         </div>
                       </td>
                       <td className="py-2.5 pr-4 font-mono text-zinc-600 dark:text-zinc-500">
-                        {v.sku || <span className="text-zinc-300 dark:text-zinc-700 italic">Auto</span>}
+                        {v.sku || <span className="text-zinc-500 dark:text-zinc-600 italic">Auto</span>}
                       </td>
                       <td className="py-2.5 pr-4 font-semibold text-zinc-900 dark:text-white">
                         {v.price
@@ -1176,7 +1176,7 @@ export default function NewProductPage({
             )}
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[10px] text-zinc-300 dark:text-zinc-700 font-bold uppercase tracking-widest">
+            <span className="text-[10px] text-zinc-500 dark:text-zinc-600 font-bold uppercase tracking-widest">
               Step {step + 1} of {STEPS.length}
             </span>
             {step < STEPS.length - 1 ? (

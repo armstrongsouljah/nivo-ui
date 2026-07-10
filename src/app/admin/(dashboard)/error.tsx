@@ -19,7 +19,7 @@ export default function AdminError({
         <h1 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight mb-2">Page Error</h1>
         <p className="text-xs text-zinc-600 dark:text-zinc-500 mb-1">Something went wrong loading this page.</p>
         {error.digest && (
-          <p className="text-[10px] font-mono text-zinc-300 dark:text-zinc-700 mb-5">Digest: {error.digest}</p>
+          <p className="text-[10px] font-mono text-zinc-500 dark:text-zinc-600 mb-5">Digest: {error.digest}</p>
         )}
         <div className="flex items-center justify-center gap-3 mt-5">
           <button

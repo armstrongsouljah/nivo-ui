@@ -94,7 +94,7 @@ export default function OrdersClient({ initial }: { initial: OrderSummary[] }) {
             >
               {s === "All" ? "All" : s}
               {count > 0 && (
-                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${active ? "bg-black/20 text-black" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"}`}>
+                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${active ? "bg-black/20 text-white dark:text-black" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"}`}>
                   {count}
                 </span>
               )}
