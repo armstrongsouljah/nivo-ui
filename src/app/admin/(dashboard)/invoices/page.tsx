@@ -9,7 +9,8 @@ export default async function InvoicesPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const { page: pageParam } = await searchParams;
-  const page = Math.max(1, Number(pageParam) || 1);
+  const parsedPage = Number(pageParam);
+  const page = Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
   // No .catch(() => []) — a real API/auth failure should surface through
   // the route's error boundary, not render as a misleading empty table.

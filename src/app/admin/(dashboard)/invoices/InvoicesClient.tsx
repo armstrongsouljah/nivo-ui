@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FileText, MessageCircle, Trash2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import type { InvoiceListItem, InvoiceStatus } from "@/lib/api";
 import { updateInvoiceStatusAction, deleteInvoiceAction } from "./actions";
@@ -75,7 +75,7 @@ function StatusSelect({ invoice, onChanged }: { invoice: InvoiceListItem; onChan
         value={invoice.status}
         disabled={busy}
         onChange={(e) => handleChange(e.target.value as InvoiceStatus)}
-        className={`appearance-none text-[10px] font-bold uppercase tracking-wider pl-2.5 pr-6 py-1 rounded-full cursor-pointer focus:outline-none disabled:opacity-50 ${STATUS_STYLES[invoice.status]}`}
+        className={`appearance-none text-[10px] font-bold uppercase tracking-wider pl-2.5 pr-6 py-1 rounded-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white disabled:opacity-50 ${STATUS_STYLES[invoice.status]}`}
       >
         {STATUS_OPTIONS.map((s) => (
           <option key={s} value={s} className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white">
@@ -92,7 +92,7 @@ function StatusSelect({ invoice, onChanged }: { invoice: InvoiceListItem; onChan
 
 export default function InvoicesClient({
   initial,
-  count,
+  count: initialCount,
   page,
   pageSize,
 }: {
@@ -102,9 +102,19 @@ export default function InvoicesClient({
   pageSize: number;
 }) {
   const [invoices, setInvoices] = useState<InvoiceListItem[]>(initial);
+  const [count, setCount] = useState(initialCount);
   const [deletingCode, setDeletingCode] = useState<string | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
   const confirm = useConfirm();
+
+  // `initial`/`initialCount` are fresh server-fetched props on every ?page=
+  // navigation, but useState only seeds from them on first mount — without
+  // this, clicking Prev/Next keeps showing the previous page's rows.
+  useEffect(() => {
+    setInvoices(initial);
+    setCount(initialCount);
+  }, [initial, initialCount]);
 
   const totalPages = Math.max(1, Math.ceil(count / pageSize));
 
@@ -123,7 +133,14 @@ export default function InvoicesClient({
     setDeletingCode(invoice.short_code);
     try {
       await deleteInvoiceAction(invoice.short_code);
-      setInvoices((prev) => prev.filter((i) => i.short_code !== invoice.short_code));
+      const remaining = invoices.filter((i) => i.short_code !== invoice.short_code);
+      setInvoices(remaining);
+      setCount((c) => Math.max(0, c - 1));
+      // Deleting the last row on a page beyond the first would otherwise
+      // strand the admin on an empty page with a stale "Page N of M".
+      if (remaining.length === 0 && page > 1) {
+        router.push(`${pathname}?page=${page - 1}`);
+      }
     } catch {
       // leave the row in place on failure
     } finally {
