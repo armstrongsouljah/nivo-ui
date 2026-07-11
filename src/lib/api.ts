@@ -217,6 +217,45 @@ export interface SalesSummary {
   total_revenue: number;
 }
 
+export type InvoiceStatus = "pending" | "paid" | "refunded";
+
+export interface InvoiceListItem {
+  id:             string;
+  short_code:     string;
+  status:         InvoiceStatus;
+  sale:           string | null;
+  order:          string | null;
+  customer_name:  string;
+  customer_phone: string;
+  total_amount:   string;
+  created_at:     string;
+}
+
+export interface InvoiceItem {
+  id:          string;
+  description: string;
+  quantity:    number;
+  unit_price:  string;
+  subtotal:    string;
+}
+
+export interface InvoiceDetail extends InvoiceListItem {
+  customer_email: string;
+  shipping_cost:  string;
+  tax_amount:     string;
+  notes:          string;
+  updated_at:     string;
+  items:          InvoiceItem[];
+}
+
+export interface InvoiceUpdatePayload {
+  status?:         InvoiceStatus;
+  customer_name?:  string;
+  customer_phone?: string;
+  customer_email?: string;
+  notes?:          string;
+}
+
 export interface ShippingAddress {
   full_name:      string;
   phone:          string;
