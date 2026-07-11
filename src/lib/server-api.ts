@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { parseDjangoError } from "./parse-api-error";
-import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, UserSummary } from "./api";
+import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, UserSummary, InvoiceListItem, InvoiceDetail, InvoiceUpdatePayload } from "./api";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
 
@@ -13,14 +13,24 @@ async function getAuthHeader(): Promise<Record<string, string>> {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!BASE_URL) throw new Error("NEXT_PUBLIC_API_URL is not configured");
   const auth = await getAuthHeader();
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...auth,
-      ...init?.headers,
-    },
-  });
+
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...auth,
+        ...init?.headers,
+      },
+    });
+  } catch (err) {
+    // A raw connection failure (e.g. the API isn't running) throws an
+    // AggregateError with no usable message once it crosses the Server
+    // Component boundary. Re-throw with a clear message instead.
+    console.error(`[server-api] ${init?.method ?? "GET"} ${path} → network error\n`, err);
+    throw new Error(`Could not reach the API at ${BASE_URL}. Is it running?`);
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
@@ -159,6 +169,25 @@ export const serverApi = {
       return request<SalesSummary>(`/sales/summary/${suffix}`);
     },
   },
+  invoices: {
+    list: (params?: { page?: number; page_size?: number; status?: string }) => {
+      const qs = new URLSearchParams();
+      qs.set("pagination_type", "page");
+      qs.set("page_size", String(params?.page_size ?? 15));
+      if (params?.page && params.page > 1) qs.set("page", String(params.page));
+      if (params?.status) qs.set("status", params.status);
+      return request<PaginatedResponse<InvoiceListItem>>(`/invoices/?${qs}`);
+    },
+    get: (shortCode: string) =>
+      request<InvoiceDetail>(`/invoices/${shortCode}/`),
+    update: (shortCode: string, payload: InvoiceUpdatePayload) =>
+      request<InvoiceDetail>(`/invoices/${shortCode}/`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    delete: (shortCode: string) =>
+      request<void>(`/invoices/${shortCode}/`, { method: "DELETE" }),
+  },
   featuredCollections: {
     list: () =>
       request<PaginatedResponse<FeaturedCollectionSummary>>("/featured-collections/?page_size=50"),
@@ -249,7 +278,12 @@ export const serverApi = {
       while (path) {
         const res: PaginatedResponse<UserSummary> = await request<PaginatedResponse<UserSummary>>(path);
         all.push(...res.results);
-        path = res.next ? res.next.replace(BASE_URL, "") : null;
+        // Extract path+query rather than string-stripping BASE_URL — `next` is
+        // built server-side from the request's own host, which can differ from
+        // NEXT_PUBLIC_API_URL (e.g. localhost vs 127.0.0.1) and silently leave
+        // BASE_URL unstripped, producing a malformed doubled-up URL on the next
+        // fetch and crashing with an opaque AggregateError.
+        path = res.next ? new URL(res.next).pathname + new URL(res.next).search : null;
       }
       return all;
     },

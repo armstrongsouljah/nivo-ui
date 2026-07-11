@@ -21,6 +21,7 @@ import {
   FolderOpen,
   Boxes,
   Receipt,
+  FileText,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
@@ -28,6 +29,7 @@ const navItems = [
   { label: "Dashboard",    href: "/admin",               icon: LayoutDashboard },
   { label: "Orders",       href: "/admin/orders",        icon: ShoppingBag },
   { label: "Sales",        href: "/admin/sales",         icon: Receipt },
+  { label: "Invoices",     href: "/admin/invoices",      icon: FileText },
   { label: "Products",     href: "/admin/products",      icon: Package },
   { label: "Stock",        href: "/admin/stock",         icon: Boxes },
   { label: "Categories",   href: "/admin/categories",    icon: FolderOpen },
