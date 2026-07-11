@@ -17,7 +17,7 @@ export default async function AdminDashboard() {
 
   const statCards = [
     { label: "Total Revenue",   value: kpi?.revenue.value   ?? 0, change: kpi?.revenue.change   ?? 0, prefix: "UGX", icon: <DollarSign size={18} /> },
-    { label: "Total Orders",    value: kpi?.orders.value    ?? 0, change: kpi?.orders.change    ?? 0, prefix: "",    icon: <ShoppingBag size={18} /> },
+    { label: "Orders & Sales",  value: kpi?.orders.value    ?? 0, change: kpi?.orders.change    ?? 0, prefix: "",    icon: <ShoppingBag size={18} /> },
     { label: "Customers",       value: kpi?.customers.value ?? 0, change: kpi?.customers.change ?? 0, prefix: "",    icon: <Users size={18} /> },
     { label: "Avg. Order Value",value: kpi?.avg_order.value ?? 0, change: kpi?.avg_order.change ?? 0, prefix: "UGX", icon: <TrendingUp size={18} /> },
   ];
