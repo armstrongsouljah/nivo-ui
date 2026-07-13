@@ -29,6 +29,10 @@ async function tryRefresh(refreshToken: string): Promise<RefreshResponse | null>
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh: refreshToken }),
+      // proxy.ts runs on the Node.js runtime, where fetch has no
+      // application-level timeout by default — without this, a slow/hung
+      // auth backend would stall every /admin/* request indefinitely.
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return null;
     return (await res.json()) as RefreshResponse;
@@ -72,13 +76,28 @@ export async function proxy(request: NextRequest) {
     if (!refreshed) return response;
     response.cookies.set("access_token", refreshed.access, {
       ...COOKIE_DEFAULTS,
-      maxAge: jwtExpirySeconds(refreshed.access) ?? 60 * 15,
+      maxAge: jwtExpirySeconds(refreshed.access) ?? 60 * 60,
     });
     if (refreshed.refresh) {
       response.cookies.set("refresh_token", refreshed.refresh, {
         ...COOKIE_DEFAULTS,
-        maxAge: jwtExpirySeconds(refreshed.refresh) ?? 60 * 60 * 24,
+        maxAge: jwtExpirySeconds(refreshed.refresh) ?? 60 * 60 * 24 * 7,
       });
+      // user_role's cookie is otherwise only ever set once, at login, with
+      // a maxAge based on that original refresh token. Since refresh
+      // tokens keep rotating forward on every successful refresh, leaving
+      // this un-renewed means it eventually expires and vanishes from the
+      // browser while access_token/refresh_token are still very much
+      // alive — isAuthenticated stays true but isAdmin flips false, which
+      // silently bounces an actively-authenticated admin to "/". Renewing
+      // it here, tied to the same refresh token's expiry, is exactly the
+      // "accidental logout" this PR exists to eliminate.
+      if (userRole) {
+        response.cookies.set("user_role", userRole, {
+          ...COOKIE_DEFAULTS,
+          maxAge: jwtExpirySeconds(refreshed.refresh) ?? 60 * 60 * 24 * 7,
+        });
+      }
     }
     return response;
   }
@@ -88,15 +107,19 @@ export async function proxy(request: NextRequest) {
     if (isAuthenticated && isAdmin) {
       return applyRefreshedCookies(NextResponse.redirect(new URL("/admin", request.url)));
     }
-    return NextResponse.next();
+    return applyRefreshedCookies(NextResponse.next());
   }
 
   // All other /admin/* routes require an active admin session
   if (!isAuthenticated) {
     const response = NextResponse.redirect(new URL("/admin/login", request.url));
-    // Refresh token was present but dead (expired/blacklisted) — clear it
-    // so subsequent requests fail fast instead of retrying a dead refresh.
-    if (refreshToken) {
+    // Only clear cookies once the refresh token is itself genuinely dead —
+    // tryRefresh() only runs when it wasn't expired going in, so landing
+    // here with a refresh failure can also mean a transient network/API
+    // error, or a race with another request that already rotated it.
+    // Wiping live cookies over a transient blip would force a real logout
+    // instead of just retrying successfully next request.
+    if (refreshToken && isJwtExpired(refreshToken)) {
       response.cookies.delete("access_token");
       response.cookies.delete("refresh_token");
       response.cookies.delete("user_role");
@@ -105,7 +128,11 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!isAdmin) {
-    return NextResponse.redirect(new URL("/", request.url));
+    // A refresh may have just rotated the tokens on this very request —
+    // route through applyRefreshedCookies so they aren't discarded. The
+    // old refresh token is already blacklisted server-side at this point,
+    // so dropping the new one here would permanently break the session.
+    return applyRefreshedCookies(NextResponse.redirect(new URL("/", request.url)));
   }
 
   return applyRefreshedCookies(NextResponse.next({ request }));

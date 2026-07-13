@@ -62,8 +62,8 @@ export async function loginAction(
   // SIMPLE_JWT settings (a prior mismatch here — 15 min hardcoded vs the
   // API's real 60 min access token lifetime — caused the cookie to vanish
   // long before the token itself expired).
-  const accessMaxAge  = jwtExpirySeconds(data.tokens.access)  ?? 60 * 15;
-  const refreshMaxAge = jwtExpirySeconds(data.tokens.refresh) ?? 60 * 60 * 24;
+  const accessMaxAge  = jwtExpirySeconds(data.tokens.access)  ?? 60 * 60;
+  const refreshMaxAge = jwtExpirySeconds(data.tokens.refresh) ?? 60 * 60 * 24 * 7;
 
   cookieStore.set("access_token", data.tokens.access, {
     ...COOKIE_DEFAULTS,
