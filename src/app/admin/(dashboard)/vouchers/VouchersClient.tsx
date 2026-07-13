@@ -29,9 +29,15 @@ function qrPath(shortCode: string) {
   return `/vouchers/${shortCode}/qr`;
 }
 
-function absoluteQrUrl(shortCode: string) {
+// Public, nicely-branded voucher view (src/app/vouchers/[shortCode]/page.tsx)
+// — what recipients actually see when they open a shared link.
+function voucherPagePath(shortCode: string) {
+  return `/vouchers/${shortCode}`;
+}
+
+function absoluteVoucherPageUrl(shortCode: string) {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  return `${origin}${qrPath(shortCode)}`;
+  return `${origin}${voucherPagePath(shortCode)}`;
 }
 
 // Local Ugandan numbers are stored as "0XXXXXXXXX"; wa.me needs the full
@@ -47,7 +53,7 @@ function normalizePhoneForWhatsApp(phone: string): string | null {
 
 function voucherShareUrl(voucher: { short_code: string; amount: string; recipient_name: string; recipient_phone?: string }) {
   const label = voucher.recipient_name ? `Hi ${voucher.recipient_name}, ` : "Hi, ";
-  const message = `${label}here's your Nivo gift voucher worth ${fmtPrice(voucher.amount)}. Show this code in-store to redeem: ${voucher.short_code}\nQR code: ${absoluteQrUrl(voucher.short_code)}`;
+  const message = `${label}here's your Nivo gift voucher worth ${fmtPrice(voucher.amount)}. View it here: ${absoluteVoucherPageUrl(voucher.short_code)}`;
   const text = encodeURIComponent(message);
   const phone = normalizePhoneForWhatsApp(voucher.recipient_phone ?? "");
   return phone ? `https://wa.me/${phone}?text=${text}` : `https://api.whatsapp.com/send?text=${text}`;
@@ -603,10 +609,10 @@ export default function VouchersClient({
                       <td className="py-3 px-4 pr-5">
                         <div className="flex items-center justify-end gap-1">
                           <a
-                            href={qrPath(voucher.short_code)}
+                            href={voucherPagePath(voucher.short_code)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title="View QR code"
+                            title="View voucher"
                             className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                           >
                             <QrCode size={14} />
