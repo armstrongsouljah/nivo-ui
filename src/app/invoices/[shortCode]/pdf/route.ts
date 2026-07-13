@@ -14,7 +14,7 @@ export async function GET(
 ) {
   const { shortCode } = await params;
 
-  const res = await fetch(`${BASE_URL}/invoices/${shortCode}/pdf/`);
+  const res = await fetch(`${BASE_URL}/invoices/${encodeURIComponent(shortCode)}/pdf/`);
   if (!res.ok) {
     return new NextResponse("Invoice not found.", { status: res.status });
   }

@@ -345,7 +345,7 @@ function CreateVoucherModal({
 
 function ShareModal({ shortCode, onClose }: { shortCode: string; onClose: () => void }) {
   const [voucher, setVoucher] = useState<{ amount: string; recipient_name: string; recipient_phone: string } | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
 
   useEffect(() => {
     let cancelled = false;
@@ -356,10 +356,10 @@ function ShareModal({ shortCode, onClose }: { shortCode: string; onClose: () => 
   }, [shortCode]);
 
   function handleCopy() {
-    navigator.clipboard.writeText(shortCode).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
+    navigator.clipboard.writeText(shortCode)
+      .then(() => setCopyStatus("copied"))
+      .catch(() => setCopyStatus("failed"))
+      .finally(() => setTimeout(() => setCopyStatus("idle"), 1500));
   }
 
   return (
@@ -383,9 +383,10 @@ function ShareModal({ shortCode, onClose }: { shortCode: string; onClose: () => 
           <button
             type="button"
             onClick={handleCopy}
+            aria-label={`Copy voucher code ${shortCode}`}
             className="font-mono text-sm font-bold text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
           >
-            {copied ? "Copied!" : shortCode}
+            {copyStatus === "copied" ? "Copied!" : copyStatus === "failed" ? "Copy failed" : shortCode}
           </button>
 
           {voucher && (
@@ -444,6 +445,7 @@ export default function VouchersClient({
   const [revokingCode, setRevokingCode] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [sharingCode, setSharingCode] = useState<string | null>(null);
+  const [revokeError, setRevokeError] = useState<{ code: string; message: string } | null>(null);
   const pathname = usePathname();
   const confirm = useConfirm();
 
@@ -470,11 +472,15 @@ export default function VouchersClient({
     });
     if (!ok) return;
     setRevokingCode(voucher.short_code);
+    setRevokeError(null);
     try {
       const updated = await revokeVoucherAction(voucher.short_code);
       updateVoucher({ ...voucher, status: updated.status });
-    } catch {
-      // leave the row in place on failure
+    } catch (e) {
+      setRevokeError({
+        code: voucher.short_code,
+        message: e instanceof Error ? e.message : "Failed to revoke voucher.",
+      });
     } finally {
       setRevokingCode(null);
     }
@@ -491,8 +497,17 @@ export default function VouchersClient({
   }
 
   function handleCreated(voucher: VoucherListItem) {
-    setVouchers((prev) => [voucher, ...prev]);
-    setCount((c) => c + 1);
+    // New vouchers are always issued as "active" — only splice it into the
+    // visible list when that matches the current filter/page, otherwise it'd
+    // render under a status tab it doesn't belong to (or push the page past
+    // pageSize). It still exists server-side either way.
+    const matchesView = !status || status === voucher.status;
+    if (matchesView) {
+      setCount((c) => c + 1);
+      if (page === 1) {
+        setVouchers((prev) => [voucher, ...prev].slice(0, pageSize));
+      }
+    }
     setShowCreateModal(false);
     setSharingCode(voucher.short_code);
   }
@@ -659,12 +674,19 @@ export default function VouchersClient({
                         </div>
                       </td>
                     </tr>
+                    {revokeError?.code === voucher.short_code && (
+                      <tr className="border-b border-zinc-200/70 dark:border-zinc-800/50 bg-red-50 dark:bg-red-500/5">
+                        <td colSpan={8} className="px-5 py-2 text-[11px] text-red-600 dark:text-red-400">
+                          {revokeError.message}
+                        </td>
+                      </tr>
+                    )}
                     {adjustingCode === voucher.short_code && (
                       <tr className="border-b border-zinc-200/70 dark:border-zinc-800/50 bg-zinc-100/40 dark:bg-zinc-800/20">
                         <td colSpan={8} className="px-5 py-3">
                           <AdjustAmountForm
                             voucher={voucher}
-                            onSaved={updateVoucher}
+                            onSaved={(updated) => { updateVoucher(updated); setAdjustingCode(null); }}
                             onCancel={() => setAdjustingCode(null)}
                           />
                         </td>
@@ -675,7 +697,7 @@ export default function VouchersClient({
                         <td colSpan={8} className="px-5 py-3">
                           <RenewForm
                             voucher={voucher}
-                            onSaved={updateVoucher}
+                            onSaved={(updated) => { updateVoucher(updated); setRenewingCode(null); }}
                             onCancel={() => setRenewingCode(null)}
                           />
                         </td>

@@ -99,15 +99,20 @@ export default async function VoucherPage({ params }: { params: Promise<{ shortC
               <p className="text-xs text-zinc-500">Redeemed on {fmtDate(voucher.used_at)}</p>
             ) : voucher.status === "cancelled" ? (
               <p className="text-xs text-zinc-500">This voucher has been cancelled and can no longer be redeemed.</p>
+            ) : isExpired ? (
+              <>
+                <p className="text-xs text-zinc-500">This voucher has expired and can no longer be redeemed.</p>
+                {voucher.expires_at && (
+                  <p className="text-[11px] text-zinc-400 mt-1.5">Expired {fmtDate(voucher.expires_at)}</p>
+                )}
+              </>
             ) : (
               <>
                 <p className="text-xs text-zinc-500">
                   Show this QR code or code to staff in-store to redeem.
                 </p>
                 {voucher.expires_at && (
-                  <p className="text-[11px] text-zinc-400 mt-1.5">
-                    {isExpired ? "Expired" : "Valid until"} {fmtDate(voucher.expires_at)}
-                  </p>
+                  <p className="text-[11px] text-zinc-400 mt-1.5">Valid until {fmtDate(voucher.expires_at)}</p>
                 )}
               </>
             )}

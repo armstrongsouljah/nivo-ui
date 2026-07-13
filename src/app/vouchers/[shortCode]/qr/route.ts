@@ -14,7 +14,7 @@ export async function GET(
 ) {
   const { shortCode } = await params;
 
-  const res = await fetch(`${BASE_URL}/vouchers/${shortCode}/qr/`);
+  const res = await fetch(`${BASE_URL}/vouchers/${encodeURIComponent(shortCode)}/qr/`);
   if (!res.ok) {
     return new NextResponse("Voucher not found.", { status: res.status });
   }
