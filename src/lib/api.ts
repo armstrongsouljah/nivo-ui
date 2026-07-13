@@ -292,6 +292,16 @@ export interface VoucherUpdatePayload {
   expires_at?:      string;
 }
 
+export interface VoucherCreatePayload {
+  voucher_type:     VoucherType;
+  amount:           string;
+  is_paid:          boolean;
+  recipient_name?:  string;
+  recipient_phone?: string;
+  recipient_email?: string;
+  expires_at?:      string;
+}
+
 export interface ShippingAddress {
   full_name:      string;
   phone:          string;

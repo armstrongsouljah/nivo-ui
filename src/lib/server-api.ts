@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { parseDjangoError } from "./parse-api-error";
-import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, UserSummary, InvoiceListItem, InvoiceDetail, InvoiceUpdatePayload, VoucherListItem, VoucherDetail, VoucherUpdatePayload } from "./api";
+import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, UserSummary, InvoiceListItem, InvoiceDetail, InvoiceUpdatePayload, VoucherListItem, VoucherDetail, VoucherUpdatePayload, VoucherCreatePayload } from "./api";
 
 // SERVER_API_URL is a runtime (not build-time inlined) override for where
 // this server issues its own fetches — useful when the browser-reachable
@@ -202,6 +202,13 @@ export const serverApi = {
       if (params?.status) qs.set("status", params.status);
       return request<PaginatedResponse<VoucherListItem>>(`/vouchers/?${qs}`);
     },
+    create: (payload: VoucherCreatePayload) =>
+      request<VoucherDetail>(`/vouchers/`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    get: (shortCode: string) =>
+      request<VoucherDetail>(`/vouchers/${shortCode}/`),
     update: (shortCode: string, payload: VoucherUpdatePayload) =>
       request<VoucherDetail>(`/vouchers/${shortCode}/`, {
         method: "PATCH",

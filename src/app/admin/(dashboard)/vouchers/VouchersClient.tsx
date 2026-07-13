@@ -3,9 +3,9 @@
 import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, Loader2, Pencil, Ban, RefreshCw, Check, X } from "lucide-react";
-import type { VoucherListItem, VoucherStatus } from "@/lib/api";
-import { adjustVoucherAmountAction, revokeVoucherAction, renewVoucherAction } from "./actions";
+import { ChevronLeft, ChevronRight, Loader2, Pencil, Ban, RefreshCw, Check, X, Plus, Share2, QrCode } from "lucide-react";
+import type { VoucherListItem, VoucherStatus, VoucherType, VoucherCreatePayload } from "@/lib/api";
+import { adjustVoucherAmountAction, revokeVoucherAction, renewVoucherAction, createVoucherAction, getVoucherAction } from "./actions";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -21,6 +21,36 @@ function fmtDate(iso: string) {
 function fmtExpiry(iso: string | null, isExpired: boolean): string | null {
   if (!iso) return null;
   return `${isExpired ? "Expired" : "Expires"} ${fmtDate(iso)}`;
+}
+
+// Public proxy route (src/app/vouchers/[shortCode]/qr/route.ts) — keeps the
+// shared link on our own domain instead of exposing the backend API host.
+function qrPath(shortCode: string) {
+  return `/vouchers/${shortCode}/qr`;
+}
+
+function absoluteQrUrl(shortCode: string) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  return `${origin}${qrPath(shortCode)}`;
+}
+
+// Local Ugandan numbers are stored as "0XXXXXXXXX"; wa.me needs the full
+// international form with no leading zero (e.g. "2567XXXXXXXX").
+function normalizePhoneForWhatsApp(phone: string): string | null {
+  if (!phone) return null;
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return null;
+  if (digits.startsWith("256")) return digits;
+  if (digits.startsWith("0")) return `256${digits.slice(1)}`;
+  return digits;
+}
+
+function voucherShareUrl(voucher: { short_code: string; amount: string; recipient_name: string; recipient_phone?: string }) {
+  const label = voucher.recipient_name ? `Hi ${voucher.recipient_name}, ` : "Hi, ";
+  const message = `${label}here's your Nivo gift voucher worth ${fmtPrice(voucher.amount)}. Show this code in-store to redeem: ${voucher.short_code}\nQR code: ${absoluteQrUrl(voucher.short_code)}`;
+  const text = encodeURIComponent(message);
+  const phone = normalizePhoneForWhatsApp(voucher.recipient_phone ?? "");
+  return phone ? `https://wa.me/${phone}?text=${text}` : `https://api.whatsapp.com/send?text=${text}`;
 }
 
 const STATUS_STYLES: Record<VoucherStatus, string> = {
@@ -146,6 +176,246 @@ function RenewForm({
   );
 }
 
+// ─── Create voucher modal ────────────────────────────────────────────────────
+
+function CreateVoucherModal({
+  onCreated,
+  onClose,
+}: {
+  onCreated: (voucher: VoucherListItem & { recipient_phone: string }) => void;
+  onClose: () => void;
+}) {
+  const [voucherType, setVoucherType] = useState<VoucherType>("spend");
+  const [amount, setAmount] = useState("");
+  const [isPaid, setIsPaid] = useState(true);
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientPhone, setRecipientPhone] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const value = parseFloat(amount);
+    if (isNaN(value) || value <= 0) { setError("Enter an amount greater than zero."); return; }
+    setBusy(true); setError(null);
+    const payload: VoucherCreatePayload = {
+      voucher_type: voucherType,
+      amount: value.toFixed(2),
+      is_paid: isPaid,
+      recipient_name: recipientName || undefined,
+      recipient_phone: recipientPhone || undefined,
+      recipient_email: recipientEmail || undefined,
+      expires_at: expiresAt ? new Date(expiresAt).toISOString() : undefined,
+    };
+    try {
+      const created = await createVoucherAction(payload);
+      onCreated({ ...created, recipient_phone: created.recipient_phone });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to issue voucher.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-auto"
+      >
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-6 mx-4 max-h-[85vh] overflow-y-auto"
+        >
+          <h2 className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wide mb-4">Issue Voucher</h2>
+
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-xs">
+                <span className="block text-zinc-600 dark:text-zinc-400 mb-1">Type</span>
+                <select
+                  value={voucherType}
+                  onChange={(e) => setVoucherType(e.target.value as VoucherType)}
+                  className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-2 py-2 rounded-md focus:outline-none focus:border-zinc-500"
+                >
+                  <option value="spend">Spend</option>
+                  <option value="discount">Discount</option>
+                </select>
+              </label>
+              <label className="text-xs">
+                <span className="block text-zinc-600 dark:text-zinc-400 mb-1">Amount</span>
+                <input
+                  type="number" step="0.01" min="0" required
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-2 py-2 rounded-md focus:outline-none focus:border-zinc-500"
+                />
+              </label>
+            </div>
+
+            <label className="text-xs block">
+              <span className="block text-zinc-600 dark:text-zinc-400 mb-1">Recipient name</span>
+              <input
+                type="text"
+                value={recipientName}
+                onChange={(e) => setRecipientName(e.target.value)}
+                className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-2 py-2 rounded-md focus:outline-none focus:border-zinc-500"
+              />
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="text-xs">
+                <span className="block text-zinc-600 dark:text-zinc-400 mb-1">Phone</span>
+                <input
+                  type="tel"
+                  value={recipientPhone}
+                  onChange={(e) => setRecipientPhone(e.target.value)}
+                  placeholder="For WhatsApp delivery"
+                  className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-2 py-2 rounded-md focus:outline-none focus:border-zinc-500"
+                />
+              </label>
+              <label className="text-xs">
+                <span className="block text-zinc-600 dark:text-zinc-400 mb-1">Email</span>
+                <input
+                  type="email"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-2 py-2 rounded-md focus:outline-none focus:border-zinc-500"
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 items-end">
+              <label className="text-xs">
+                <span className="block text-zinc-600 dark:text-zinc-400 mb-1">Expires (optional)</span>
+                <input
+                  type="date"
+                  value={expiresAt}
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                  className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs px-2 py-2 rounded-md focus:outline-none focus:border-zinc-500"
+                />
+              </label>
+              <label className="flex items-center gap-2 text-xs text-zinc-700 dark:text-zinc-300 pb-2">
+                <input
+                  type="checkbox"
+                  checked={isPaid}
+                  onChange={(e) => setIsPaid(e.target.checked)}
+                  className="rounded"
+                />
+                Already paid
+              </label>
+            </div>
+          </div>
+
+          {error && <p className="text-[11px] text-red-600 dark:text-red-400 mt-3">{error}</p>}
+
+          <div className="flex gap-2 justify-end mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors uppercase tracking-widest"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={busy}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition-colors uppercase tracking-widest bg-blue-500 text-white dark:bg-white dark:text-black hover:bg-blue-600 dark:hover:bg-zinc-200 disabled:opacity-50"
+            >
+              {busy && <Loader2 size={12} className="animate-spin" />} Issue Voucher
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
+  );
+}
+
+// ─── Share voucher modal ─────────────────────────────────────────────────────
+
+function ShareModal({ shortCode, onClose }: { shortCode: string; onClose: () => void }) {
+  const [voucher, setVoucher] = useState<{ amount: string; recipient_name: string; recipient_phone: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getVoucherAction(shortCode).then((detail) => {
+      if (!cancelled) setVoucher(detail);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [shortCode]);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(shortCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
+
+  return (
+    <>
+      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xs mx-auto"
+      >
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-6 mx-4 text-center">
+          <h2 className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wide mb-4">Voucher Issued</h2>
+
+          {/* eslint-disable-next-line @next/next/no-img-element -- backend-proxied dynamic PNG, not an optimizable static asset */}
+          <img
+            src={qrPath(shortCode)}
+            alt={`QR code for voucher ${shortCode}`}
+            className="mx-auto mb-3 w-40 h-40 rounded-lg border border-zinc-200 dark:border-zinc-800"
+          />
+
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="font-mono text-sm font-bold text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+          >
+            {copied ? "Copied!" : shortCode}
+          </button>
+
+          {voucher && (
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-3">
+              {fmtPrice(voucher.amount)}{voucher.recipient_name ? ` for ${voucher.recipient_name}` : ""}
+            </p>
+          )}
+
+          <div className="flex gap-2 justify-center mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors uppercase tracking-widest"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const url = voucher
+                  ? voucherShareUrl({ short_code: shortCode, ...voucher })
+                  : voucherShareUrl({ short_code: shortCode, amount: "0", recipient_name: "" });
+                const tab = window.open(url, "_blank");
+                if (tab) tab.opener = null;
+              }}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition-colors uppercase tracking-widest bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Share2 size={12} /> Share via WhatsApp
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Main component ─────────────────────────────────────────────────────────────
 
 export default function VouchersClient({
@@ -166,6 +436,8 @@ export default function VouchersClient({
   const [adjustingCode, setAdjustingCode] = useState<string | null>(null);
   const [renewingCode, setRenewingCode] = useState<string | null>(null);
   const [revokingCode, setRevokingCode] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [sharingCode, setSharingCode] = useState<string | null>(null);
   const pathname = usePathname();
   const confirm = useConfirm();
 
@@ -212,6 +484,13 @@ export default function VouchersClient({
     setRenewingCode((prev) => prev === shortCode ? null : shortCode);
   }
 
+  function handleCreated(voucher: VoucherListItem) {
+    setVouchers((prev) => [voucher, ...prev]);
+    setCount((c) => c + 1);
+    setShowCreateModal(false);
+    setSharingCode(voucher.short_code);
+  }
+
   function statusHref(value: VoucherStatus | undefined) {
     const qs = new URLSearchParams();
     if (value) qs.set("status", value);
@@ -222,10 +501,19 @@ export default function VouchersClient({
   return (
     <main className="flex-1 px-4 sm:px-6 py-6 overflow-y-auto">
       {/* Header */}
-      <div className="mb-6">
-        <p className="text-[11px] font-bold tracking-[0.2em] text-zinc-600 dark:text-zinc-500 uppercase mb-1">Billing</p>
-        <h1 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">Vouchers</h1>
-        <p className="text-xs text-zinc-600 dark:text-zinc-500 mt-1">{count} voucher{count !== 1 ? "s" : ""} total</p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-bold tracking-[0.2em] text-zinc-600 dark:text-zinc-500 uppercase mb-1">Billing</p>
+          <h1 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">Vouchers</h1>
+          <p className="text-xs text-zinc-600 dark:text-zinc-500 mt-1">{count} voucher{count !== 1 ? "s" : ""} total</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-500 text-white dark:bg-white dark:text-black text-xs font-bold uppercase tracking-widest rounded-md hover:bg-blue-600 dark:hover:bg-zinc-200 transition-colors shrink-0"
+        >
+          <Plus size={14} /> Issue Voucher
+        </button>
       </div>
 
       {/* Status filter tabs */}
@@ -313,39 +601,56 @@ export default function VouchersClient({
                         {fmtDate(voucher.created_at)}
                       </td>
                       <td className="py-3 px-4 pr-5">
-                        {voucher.status === "active" ? (
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              type="button"
-                              onClick={() => openAdjust(voucher.short_code)}
-                              title="Adjust amount"
-                              className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-                            >
-                              <Pencil size={14} />
-                            </button>
-                            {voucher.is_expired && (
+                        <div className="flex items-center justify-end gap-1">
+                          <a
+                            href={qrPath(voucher.short_code)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="View QR code"
+                            className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                          >
+                            <QrCode size={14} />
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => setSharingCode(voucher.short_code)}
+                            title="Share via WhatsApp"
+                            className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-500/10 transition-colors"
+                          >
+                            <Share2 size={14} />
+                          </button>
+                          {voucher.status === "active" && (
+                            <>
                               <button
                                 type="button"
-                                onClick={() => openRenew(voucher.short_code)}
-                                title="Renew voucher"
-                                className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                onClick={() => openAdjust(voucher.short_code)}
+                                title="Adjust amount"
+                                className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                               >
-                                <RefreshCw size={14} />
+                                <Pencil size={14} />
                               </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => handleRevoke(voucher)}
-                              disabled={revokingCode === voucher.short_code}
-                              title="Revoke voucher"
-                              className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                            >
-                              {revokingCode === voucher.short_code ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />}
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="block text-right text-zinc-400 dark:text-zinc-700">—</span>
-                        )}
+                              {voucher.is_expired && (
+                                <button
+                                  type="button"
+                                  onClick={() => openRenew(voucher.short_code)}
+                                  title="Renew voucher"
+                                  className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                >
+                                  <RefreshCw size={14} />
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleRevoke(voucher)}
+                                disabled={revokingCode === voucher.short_code}
+                                title="Revoke voucher"
+                                className="p-1.5 rounded-md text-zinc-600 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                              >
+                                {revokingCode === voucher.short_code ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />}
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                     {adjustingCode === voucher.short_code && (
@@ -407,6 +712,13 @@ export default function VouchersClient({
             </div>
           </div>
         </div>
+      )}
+
+      {showCreateModal && (
+        <CreateVoucherModal onCreated={handleCreated} onClose={() => setShowCreateModal(false)} />
+      )}
+      {sharingCode && (
+        <ShareModal shortCode={sharingCode} onClose={() => setSharingCode(null)} />
       )}
     </main>
   );

@@ -1,7 +1,15 @@
 "use server";
 
 import { serverApi } from "@/lib/server-api";
-import type { VoucherDetail } from "@/lib/api";
+import type { VoucherCreatePayload, VoucherDetail } from "@/lib/api";
+
+export async function createVoucherAction(payload: VoucherCreatePayload): Promise<VoucherDetail> {
+  return serverApi.vouchers.create(payload);
+}
+
+export async function getVoucherAction(shortCode: string): Promise<VoucherDetail> {
+  return serverApi.vouchers.get(shortCode);
+}
 
 export async function adjustVoucherAmountAction(shortCode: string, amount: string): Promise<VoucherDetail> {
   return serverApi.vouchers.update(shortCode, { amount });
