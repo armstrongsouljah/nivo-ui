@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { parseDjangoError } from "./parse-api-error";
-import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, UserSummary, InvoiceListItem, InvoiceDetail, InvoiceUpdatePayload } from "./api";
+import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, UserSummary, InvoiceListItem, InvoiceDetail, InvoiceUpdatePayload, VoucherListItem, VoucherDetail, VoucherUpdatePayload } from "./api";
 
 // SERVER_API_URL is a runtime (not build-time inlined) override for where
 // this server issues its own fetches — useful when the browser-reachable
@@ -192,6 +192,28 @@ export const serverApi = {
       }),
     delete: (shortCode: string) =>
       request<void>(`/invoices/${shortCode}/`, { method: "DELETE" }),
+  },
+  vouchers: {
+    list: (params?: { page?: number; page_size?: number; status?: string }) => {
+      const qs = new URLSearchParams();
+      qs.set("pagination_type", "page");
+      qs.set("page_size", String(params?.page_size ?? 15));
+      if (params?.page && params.page > 1) qs.set("page", String(params.page));
+      if (params?.status) qs.set("status", params.status);
+      return request<PaginatedResponse<VoucherListItem>>(`/vouchers/?${qs}`);
+    },
+    update: (shortCode: string, payload: VoucherUpdatePayload) =>
+      request<VoucherDetail>(`/vouchers/${shortCode}/`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    revoke: (shortCode: string) =>
+      request<VoucherDetail>(`/vouchers/${shortCode}/revoke/`, { method: "POST" }),
+    renew: (shortCode: string, extendDays: number) =>
+      request<VoucherDetail>(`/vouchers/${shortCode}/renew/`, {
+        method: "POST",
+        body: JSON.stringify({ extend_days: extendDays }),
+      }),
   },
   featuredCollections: {
     list: () =>
