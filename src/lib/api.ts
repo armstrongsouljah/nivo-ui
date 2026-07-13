@@ -256,6 +256,52 @@ export interface InvoiceUpdatePayload {
   notes?:          string;
 }
 
+export type VoucherType   = "discount" | "spend";
+export type VoucherStatus = "active" | "used" | "cancelled";
+
+export interface VoucherListItem {
+  id:             string;
+  short_code:     string;
+  voucher_type:   VoucherType;
+  status:         VoucherStatus;
+  amount:         string;
+  is_paid:        boolean;
+  recipient_name: string;
+  expires_at:     string | null;
+  is_expired:     boolean;
+  created_at:     string;
+}
+
+export interface VoucherDetail extends VoucherListItem {
+  purchaser:       string | null;
+  recipient_phone: string;
+  recipient_email: string;
+  used_at:         string | null;
+  used_by:         string | null;
+  updated_at:      string;
+}
+
+export interface VoucherUpdatePayload {
+  voucher_type?:    VoucherType;
+  amount?:          string;
+  is_paid?:         boolean;
+  status?:          VoucherStatus;
+  recipient_name?:  string;
+  recipient_phone?: string;
+  recipient_email?: string;
+  expires_at?:      string;
+}
+
+export interface VoucherCreatePayload {
+  voucher_type:     VoucherType;
+  amount:           string;
+  is_paid:          boolean;
+  recipient_name?:  string;
+  recipient_phone?: string;
+  recipient_email?: string;
+  expires_at?:      string;
+}
+
 export interface ShippingAddress {
   full_name:      string;
   phone:          string;
