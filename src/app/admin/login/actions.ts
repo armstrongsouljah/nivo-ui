@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation"; // used by loginAction
+import { jwtExpirySeconds } from "@/lib/jwt";
 
 // See server-api.ts: SERVER_API_URL is a runtime-only override for this
 // server's own fetches, used when NEXT_PUBLIC_API_URL (frozen into the JS
@@ -56,20 +57,28 @@ export async function loginAction(
 
   const cookieStore = await cookies();
 
+  // Derived from each token's own exp claim rather than hardcoded, so the
+  // cookie's lifetime can't drift out of sync with the backend's actual
+  // SIMPLE_JWT settings (a prior mismatch here — 15 min hardcoded vs the
+  // API's real 60 min access token lifetime — caused the cookie to vanish
+  // long before the token itself expired).
+  const accessMaxAge  = jwtExpirySeconds(data.tokens.access)  ?? 60 * 15;
+  const refreshMaxAge = jwtExpirySeconds(data.tokens.refresh) ?? 60 * 60 * 24;
+
   cookieStore.set("access_token", data.tokens.access, {
     ...COOKIE_DEFAULTS,
-    maxAge: 60 * 15, // 15 min — matches API access token lifetime
+    maxAge: accessMaxAge,
   });
 
   cookieStore.set("refresh_token", data.tokens.refresh, {
     ...COOKIE_DEFAULTS,
-    maxAge: 60 * 60 * 24, // 24 h
+    maxAge: refreshMaxAge,
   });
 
   // Non-sensitive — used by proxy for role check without decoding JWT
   cookieStore.set("user_role", data.user.role, {
     ...COOKIE_DEFAULTS,
-    maxAge: 60 * 60 * 24,
+    maxAge: refreshMaxAge,
   });
 
   redirect("/admin");
