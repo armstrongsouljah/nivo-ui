@@ -2,7 +2,12 @@ import { cookies } from "next/headers";
 import { parseDjangoError } from "./parse-api-error";
 import type { PaginatedResponse, Category, CategoryDetail, Product, ProductDetail, ProductVariantDetail, ProductCreatePayload, ProductUpdatePayload, VariantCreatePayload, VariantUpdatePayload, GalleryImage, AttributeDetail, AttributeValueItem, FeaturedCollectionSummary, FeaturedCollectionDetail, FeaturedCollectionCreatePayload, FeaturedCollectionUpdatePayload, OrderSummary, OrderDetail, OrderCreatePayload, OrderResponse, AdminProfile, StockEntry, StockCreatePayload, StockUpdatePayload, StockTransactionCreatePayload, SaleListItem, SaleDetail, SaleCreatePayload, SalesSummary, UserSummary, InvoiceListItem, InvoiceDetail, InvoiceUpdatePayload } from "./api";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
+// SERVER_API_URL is a runtime (not build-time inlined) override for where
+// this server issues its own fetches — useful when the browser-reachable
+// NEXT_PUBLIC_API_URL (frozen into the JS bundle at build time) isn't
+// reachable from inside this process, e.g. "localhost" from within a
+// docker-compose container needs to be "host.docker.internal" instead.
+const BASE_URL = (process.env.SERVER_API_URL || process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const cookieStore = await cookies();

@@ -12,10 +12,14 @@ services:
     restart: unless-stopped
     environment:
       CLOUDINARY_URL: ${CLOUDINARY_URL}
+      # Runtime override for this server's own fetches, read live (not baked
+      # into the image). Only needed when NEXT_PUBLIC_API_URL isn't reachable
+      # from inside the container, e.g. a host-run API during local testing.
+      SERVER_API_URL: ${SERVER_API_URL:-}
     ports:
       - "3000:8080"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8082"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080"]
       interval: 15s
       timeout: 5s
       retries: 5
