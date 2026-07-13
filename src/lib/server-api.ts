@@ -16,7 +16,7 @@ async function getAuthHeader(): Promise<Record<string, string>> {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  if (!BASE_URL) throw new Error("NEXT_PUBLIC_API_URL is not configured");
+  if (!BASE_URL) throw new Error("SERVER_API_URL or NEXT_PUBLIC_API_URL is not configured");
   const auth = await getAuthHeader();
 
   let res: Response;
