@@ -3,7 +3,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation"; // used by loginAction
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!.replace(/\/$/, "");
+// See server-api.ts: SERVER_API_URL is a runtime-only override for this
+// server's own fetches, used when NEXT_PUBLIC_API_URL (frozen into the JS
+// bundle at build time) isn't reachable from inside this process.
+const API_URL = (process.env.SERVER_API_URL || process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 const IS_PROD = process.env.NODE_ENV === "production";
 
 const COOKIE_DEFAULTS = {

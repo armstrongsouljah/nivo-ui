@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
+// See server-api.ts: SERVER_API_URL is a runtime-only override for this
+// server's own fetches, used when NEXT_PUBLIC_API_URL (frozen into the JS
+// bundle at build time) isn't reachable from inside this process.
+const BASE_URL = (process.env.SERVER_API_URL || process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
 // Public proxy so shared invoice links (WhatsApp, etc.) point at our own
 // domain instead of leaking the backend API host. Not under /admin — this
