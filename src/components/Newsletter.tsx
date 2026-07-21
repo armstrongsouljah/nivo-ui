@@ -16,37 +16,37 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="bg-zinc-900 py-14 sm:py-20 px-4 sm:px-6">
+    <section className="bg-sage/30 py-14 sm:py-20 px-4 sm:px-6">
       <div className="max-w-xl mx-auto text-center">
-        <p className="text-[11px] font-bold tracking-[0.3em] text-zinc-400 uppercase mb-3">
+        <p className="text-[11px] font-semibold tracking-[0.25em] text-ink/50 uppercase mb-3">
           Stay in the Loop
         </p>
-        <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight mb-3">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-ink tracking-tight mb-3">
           Sign Up &amp; Save 10%
         </h2>
-        <p className="text-zinc-400 text-sm leading-relaxed mb-8">
-          Get early access to new drops, exclusive deals, and style inspiration — straight to your inbox.
+        <p className="text-ink/60 text-sm leading-relaxed mb-8">
+          Get early access to new arrivals, gentle-care tips, and little-one style inspiration — straight to your inbox.
         </p>
 
         {submitted ? (
-          <div className="bg-white/5 border border-white/10 rounded-sm px-6 py-5">
-            <p className="text-white font-bold tracking-wide text-sm">
+          <div className="bg-white/60 border border-ink/10 rounded-2xl px-6 py-5">
+            <p className="text-ink font-semibold text-sm">
               You&apos;re in! Check your inbox for your discount code.
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-0 max-w-md mx-auto">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              className="flex-1 bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm px-4 py-3.5 outline-none focus:border-white/30 transition-colors"
+              className="flex-1 bg-white/70 border border-ink/10 rounded-full text-ink placeholder-ink/40 text-sm px-5 py-3.5 outline-none focus:border-ink/30 transition-colors"
             />
             <button
               type="submit"
-              className="bg-white text-black font-bold text-xs tracking-widest uppercase px-6 py-3.5 flex items-center justify-center gap-2 hover:bg-zinc-200 transition-colors"
+              className="bg-ink text-cream font-semibold text-xs tracking-widest uppercase rounded-full px-6 py-3.5 flex items-center justify-center gap-2 hover:bg-ink/85 transition-colors"
             >
               Subscribe
               <Send size={13} />
@@ -54,7 +54,7 @@ export default function Newsletter() {
           </form>
         )}
 
-        <p className="text-zinc-600 text-xs mt-4">
+        <p className="text-ink/40 text-xs mt-4">
           No spam, ever. Unsubscribe at any time.
         </p>
       </div>

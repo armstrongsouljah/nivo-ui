@@ -12,8 +12,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Nivo — Boys Clothing",
-  description: "Fresh fits for the boys. Shop new arrivals and featured collections.",
+  title: "Nivo — Baby Clothing",
+  description: "Soft, breathable essentials for your little one. Shop new arrivals for newborns and babies.",
 };
 
 // Runs before hydration so the admin dashboard's theme is correct on first
