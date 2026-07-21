@@ -14,6 +14,14 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
+
+  /* Soft, warm storefront palette for the baby-clothing landing page */
+  --color-cream: #fbf6f0;
+  --color-ink: #33291f;
+  --color-blush: #f2ddd4;
+  --color-sage: #cbd6c2;
+  --color-rose: #c98b7a;
+  --color-rose-dark: #b5735f;
 }
 
 * {
